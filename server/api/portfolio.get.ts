@@ -2,13 +2,12 @@ export default defineEventHandler(() => {
   return {
     careerStartYear: 2020,
     about: {
-      // Dois segmentos: use " | " entre partes se quiser usar no hero no futuro
-      headline: 'Wladi Veras · fullstack e produto digital',
-      title: 'Fullstack e produto digital',
+      headline: 'Wladi Veras · fullstack, arquitetura e produto em operação',
+      title: 'Sistemas que precisam funcionar de verdade',
       summary:
-        'Produto bom não é o que parece bonito. É o que funciona na prova de fogo e ainda escala sem te dar dor de cabeça.',
+        'Eu trabalho no ponto em que produto, arquitetura e operação se encontram. Quando tem pressão, volume, pagamento, fila ou atendimento travando, é aí que a solução precisa ser pensada direito.',
       longText:
-        'Comecei com WordPress e temas bem no começo; foi ali que HTML, CSS e lógica entraram de vez. Depois vieram agência, startup e o desafio de empreender, de sistema para restaurante a gateway com integração que não pode falhar. Na Greenn vivi pagamento e tráfego de verdade; em outros projetos afinei chatbot, checkout e campanha. Hoje eu ligo discovery, interface e código no mesmo fio: produto bom é tela e bastidor conversando no mesmo ritmo.',
+        'Comecei cedo, passando por WordPress, frontend, backend e produto, até chegar em contextos onde o sistema precisava aguentar mais do que uma boa interface. Na prática, isso me levou para projetos com checkout, gateway, chatbot, rastreio, campanha, área de membros e operação real rodando todos os dias. Em fintech, atuei olhando falha, risco, correção em produção e confiabilidade do fluxo. Em operação de atendimento, fui para a raiz da dor do operador, estruturando uso de IA, dashboard de acompanhamento e ações para melhorar aprendizado, reduzir erro e dar mais clareza para quem estava na ponta. Hoje meu foco é o mesmo em qualquer contexto: entender a causa, desenhar uma solução sólida e fazer o produto funcionar sem virar peso para o time.',
       profileImage: '/media/images/testimonials/wladi.jpg'
     },
     skills: [
@@ -36,39 +35,33 @@ export default defineEventHandler(() => {
         duration: 'Janeiro 2024 - Presente',
         site: 'https://workana.com.br',
         description: [
-          'Conduzi de ponta a ponta um chatbot com IA — fluxos, personalização de respostas e automação que colocou o atendimento num ritmo novo.',
-          'Desenhei interfaces onde cada clique faz sentido: protótipos, UI refinada e UX alinhada ao que o utilizador realmente precisa.',
-          'Lancei o Linksplit: um link, vários destinos aleatórios — ferramenta de campanha com rastreio para marketing medir e iterar rápido.',
-          'Entreguei um checkout responsivo pensado em conversão: menos fricção, mais confiança em qualquer ecrã.',
-          'Liderei o squad do briefing à entrega — escopo, prioridades e ritmo para o produto não perder o fio à meada.',
-          'Mantive o sistema estável em escala: performance, segurança e dados protegidos como parte do dia a dia, não como extra.'
+          'Atuei na interseção entre produto, interface e fluxo real de uso.',
+          'Estruturei chatbot com IA, personalização de respostas, automação e jornadas mais úteis para o atendimento.',
+          'Transformei necessidades de campanha e operação em ferramentas práticas, como o Linksplit e fluxos com rastreio mais claro.',
+          'Trabalhei com foco em conversão, clareza de interface e estabilidade de sistema, sem separar experiência de uso da parte técnica que sustenta tudo.'
         ]
       },
       {
         role: 'Fullstack Developer',
         company: 'Greenn',
-        duration: 'fevereiro 2022 - Janeiro 2024',
+        duration: 'Fevereiro 2022 - Janeiro 2024',
         site: 'https://greenn.com.br',
         description: [
-          'Integrei-me a uma stack exigente — Laravel, Node, Redis, RabbitMQ, Vue, Nuxt e TypeScript — e transformei requisitos em features que aguentam tráfego real.',
-          'Percorri três squads e deixei marca em greenn.com.br, greenn.club e gdigital.com.br: novas peças, dívidas pagas e produtos sempre no ar.',
-          'Fui à linha da frente em pagamentos: gateways, checkouts e assinaturas recorrentes com backend à altura do risco financeiro.',
-          'Construí fluxos para cursos e funis de venda onde velocidade e integração não eram negociáveis.',
-          'Entrei cedo no planeamento e na definição de escopo — qualidade e prazo deixaram de ser surpresa na retrospectiva.',
-          'Ajudei a manter tudo escalável: pares técnicos, código sustentável e incidentes cada vez mais raros.'
+          'Vivi o contexto de tráfego real, pagamento, assinatura e risco operacional em produto digital.',
+          'Trabalhei com Laravel, Node, Redis, RabbitMQ, Vue, Nuxt e TypeScript em um ambiente que exigia consistência, velocidade e segurança.',
+          'Passei por diferentes squads, atuando em checkout, gateway, recorrência, funis e fluxos que não podiam falhar.',
+          'Foi um ciclo importante para consolidar visão de arquitetura, escala, integração e impacto direto no negócio.'
         ]
       },
       {
         role: 'Fullstack Developer',
         company: 'Alternativa Card',
-        duration: 'Julho 2021 - agosto 2022',
+        duration: 'Julho 2021 - Agosto 2022',
         site: 'https://alternativacard.com.br',
         description: [
-          'Levantei do zero um produto Laravel + Vue 3 + Redis: arquitetura limpa e cache onde fazia diferença na performance.',
-          'Fui dono do roadmap técnico — escopo, melhorias contínuas e cada sprint com entregas que o negócio sentia.',
-          'Criei experiências com cards vivos: pedido no site, acompanhamento em tempo real — o cliente via o estado do pedido sem ligar à empresa.',
-          'Garanti que o sistema aguentasse crescimento: estável, previsível e pronto para mais utilizadores.',
-          'Coloquei o deploy e a segurança no mesmo pacote — pipeline sólido e dados tratados com o rigor que o cartão exige.'
+          'Participei da construção de um produto desde a base, com Laravel, Vue 3 e Redis.',
+          'Acompanhei de perto a evolução da arquitetura, do roadmap e da experiência do cliente no fluxo do pedido.',
+          'O foco era simples: deixar o sistema previsível, acompanhar o crescimento e transformar operação em algo mais claro para quem usava.'
         ]
       }
     ],
@@ -124,7 +117,7 @@ export default defineEventHandler(() => {
         title: 'inDev - portfólio',
         star: false,
         description:
-          'O inDev é um portfólio open source, criado para quem busca uma solução prática e eficiente para exibir serviços e conquistas. Com estrutura otimizada e fácil personalização, permite apresentar sua trajetória de forma profissional e organizada. Ideal para freelancers, desenvolvedores e criativos, o inDev destaca projetos, compartilha experiências e atrai novas oportunidades. Simples de usar e focado em resultados, é a ferramenta perfeita para mostrar seu talento de forma clara e objetiva.',
+          'Portfólio open source em Nuxt: base para expor projetos e trajetória sem reinventar layout do zero. Foco em estrutura clara e fácil de adaptar.',
         technologies: [
           'Nuxt 3',
           'Pinia',

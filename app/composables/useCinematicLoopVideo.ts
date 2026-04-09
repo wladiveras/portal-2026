@@ -42,7 +42,11 @@ export function useCinematicLoopVideo(
   const tick = () => {
     if (cancelled || !import.meta.client) return
     const el = boundEl
-    if (!el || !el.duration || !Number.isFinite(el.duration)) {
+    // duration pode ser NaN/0 antes de loadedmetadata — sem isto a opacidade fica 0 para sempre
+    if (!el || !Number.isFinite(el.duration) || el.duration <= 0) {
+      if (el && el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        opacity.value = 1
+      }
       raf = rafNow(tick)
       return
     }

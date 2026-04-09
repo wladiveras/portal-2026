@@ -5,9 +5,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const props = defineProps<{
-  skills: string[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    skills: string[]
+    /** Painel sem fundo opaco (ex.: vídeo atrás no mobile); em md+ volta o fundo suave. */
+    overBackdrop?: boolean
+  }>(),
+  { overBackdrop: false }
+)
 
 const gid = `c-${useId().replace(/[^a-z0-9]/gi, '')}`
 const rootRef = ref<HTMLElement | null>(null)
@@ -27,9 +32,9 @@ const positions = computed(() => {
     const idx = i % 8
     const countOnRing = Math.min(8, n - (ring - 1) * 8)
     const angle = (idx / countOnRing) * Math.PI * 2 - Math.PI / 2 + ring * 0.35
-    const baseR = 14 + ring * 10 + (rings > 1 ? ring * 4 : 8)
+    const baseR = 16 + ring * 12 + (rings > 1 ? ring * 5 : 9)
     const wobble = Math.sin(i * 1.37) * 3.5 + Math.cos(i * 0.91) * 2.5
-    const r = Math.min(baseR + wobble, 42)
+    const r = Math.min(baseR + wobble, 46)
     out.push({
       x: cx + Math.cos(angle) * r * (0.94 + 0.06 * Math.sin(i)),
       y: cy + Math.sin(angle) * r * (0.9 + 0.1 * Math.cos(i * 1.2))
@@ -145,11 +150,13 @@ onUnmounted(() => {
 <template>
   <div ref="rootRef" class="relative mx-auto w-full max-w-xl lg:max-w-none">
     <div
-      class="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-[#89aacc]/[0.12] via-transparent to-[#4e85bf]/[0.1] blur-2xl"
+      class="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-[#89aacc]/[0.1] via-transparent to-[#4e85bf]/[0.08] blur-2xl"
+      :class="props.overBackdrop ? 'opacity-[0.32] md:opacity-100' : ''"
     />
-    <!-- Sem backdrop-filter: evita faixa escura no topo ao rolar a página (Chromium + overflow + radius) -->
+    <!-- Sem borda: com overBackdrop o vídeo aparece entre as pills no mobile -->
     <div
-      class="relative isolate min-h-[280px] overflow-hidden rounded-[1.75rem] border border-white/75 bg-white/50 ring-1 ring-stroke/20 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.92)] sm:min-h-[320px] md:min-h-[360px]"
+      class="relative isolate min-h-[300px] overflow-hidden rounded-[1.75rem] sm:min-h-[340px] md:min-h-[380px]"
+      :class="props.overBackdrop ? 'bg-transparent md:bg-white/40' : 'bg-white/40'"
     >
       <svg
         class="absolute inset-0 h-full w-full"
@@ -188,7 +195,7 @@ onUnmounted(() => {
           }"
         >
           <span
-            class="block rounded-full border border-white/90 bg-white/80 px-2.5 py-1 text-center text-[10px] font-medium leading-tight text-text-primary/88 ring-1 ring-stroke/30 sm:px-3 sm:text-[11px]"
+            class="block rounded-full bg-white/92 px-2.5 py-1.5 text-center text-[10px] font-medium leading-tight text-text-primary/90 shadow-[0_1px_0_rgba(255,255,255,0.9)] sm:px-3.5 sm:py-1.5 sm:text-[11px]"
           >
             {{ skill }}
           </span>

@@ -295,48 +295,28 @@ onUnmounted(() => {
         </p>
       </header>
 
-      <ClientOnly>
+      <div
+        ref="statsRowRef"
+        data-work-stats
+        class="mx-auto mt-12 flex max-w-xl flex-wrap justify-center gap-x-10 gap-y-8 border-y border-stroke/25 py-9 md:mt-14 md:max-w-2xl md:gap-x-14 md:py-10"
+      >
         <div
-          ref="statsRowRef"
-          data-work-stats
-          class="mx-auto mt-12 flex max-w-xl flex-wrap justify-center gap-x-10 gap-y-8 border-y border-stroke/25 py-9 md:mt-14 md:max-w-2xl md:gap-x-14 md:py-10"
+          v-for="(m, i) in metrics"
+          :key="`stat-${i}`"
+          class="stat-count-wrap min-w-[5.5rem] text-center"
         >
-          <div
-            v-for="(m, i) in metrics"
-            :key="`stat-${i}`"
-            class="stat-count-wrap min-w-[5.5rem] text-center"
+          <p
+            class="font-display text-[clamp(2.25rem,5vw,3rem)] italic tabular-nums leading-none text-[#141a22] [will-change:transform]"
           >
-            <p
-              class="font-display text-[clamp(2.25rem,5vw,3rem)] italic tabular-nums leading-none text-[#141a22] [will-change:transform]"
-            >
-              {{ statDisplay[i] }}{{ m.suffix }}
-            </p>
-            <p
-              class="mt-2 text-[11px] uppercase tracking-[0.14em] text-muted/90 md:text-xs md:normal-case md:tracking-normal"
-            >
-              {{ m.label }}
-            </p>
-          </div>
+            {{ statDisplay[i] }}{{ m.suffix }}
+          </p>
+          <p
+            class="mt-2 text-[11px] uppercase tracking-[0.14em] text-muted/90 md:text-xs md:normal-case md:tracking-normal"
+          >
+            {{ m.label }}
+          </p>
         </div>
-        <template #fallback>
-          <div
-            class="mx-auto mt-12 flex max-w-xl flex-wrap justify-center gap-x-10 gap-y-8 border-y border-stroke/25 py-9 md:mt-14 md:max-w-2xl md:gap-x-14 md:py-10"
-          >
-            <div v-for="(m, i) in metrics" :key="`fb-${i}`" class="min-w-[5.5rem] text-center">
-              <p
-                class="font-display text-[clamp(2.25rem,5vw,3rem)] italic tabular-nums leading-none text-[#141a22]"
-              >
-                {{ m.display }}
-              </p>
-              <p
-                class="mt-2 text-[11px] uppercase tracking-[0.14em] text-muted/90 md:text-xs md:normal-case md:tracking-normal"
-              >
-                {{ m.label }}
-              </p>
-            </div>
-          </div>
-        </template>
-      </ClientOnly>
+      </div>
 
       <div class="mx-auto mt-14 max-w-2xl md:mt-16">
         <p

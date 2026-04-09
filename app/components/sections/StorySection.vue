@@ -16,6 +16,13 @@ const TIMELINE_PIN_FADE_MS = 1100
 
 const store = usePortfolioStore()
 const rootRef = ref<HTMLElement | null>(null)
+const introBlockRef = ref<HTMLElement | null>(null)
+const introTextColRef = ref<HTMLElement | null>(null)
+const diamondRailRef = ref<HTMLElement | null>(null)
+const diamondFloatWrapRef = ref<HTMLElement | null>(null)
+const diamondVideoRef = ref<HTMLVideoElement | null>(null)
+/** Vídeo só no mobile: fundo atrás da constelação (coluna direita fica `md+` apenas). */
+const mobileStackDiamondVideoRef = ref<HTMLVideoElement | null>(null)
 const parallaxPinned = ref<HTMLElement | null>(null)
 const scrollProgress = ref(0)
 const hoveredLine = ref<number | null>(null)
@@ -23,7 +30,9 @@ const expandedLine = ref<number | null>(null)
 const mdUp = ref(false)
 const tweens: gsap.core.Tween[] = []
 let stParallax: ScrollTrigger | null = null
+let diamondIntroTween: gsap.core.Tween | null = null
 let mqCleanup: (() => void) | null = null
+let introColResizeRo: ResizeObserver | null = null
 
 const { prefersReducedMotion } = useReducedMotion()
 const timelineVideoRef = ref<HTMLVideoElement | null>(null)
@@ -70,8 +79,6 @@ watch(timelinePinActive, (active) => {
     v.pause()
   }
 })
-
-const serviceLine = computed(() => landing.story.chapters.flatMap((c) => c.items).join(' · '))
 
 const constellationSkills = computed(() => {
   if (store.skills.length) return store.skills.slice(0, 22)
@@ -145,6 +152,72 @@ function timelineDotTop(ti: number, total: number) {
   return `${start + (ti / (total - 1)) * span}%`
 }
 
+function playVideoEl(v: HTMLVideoElement | null) {
+  if (!v) return
+  v.muted = true
+  void v.play().catch(() => {
+    const retry = () => {
+      void v.play().catch(() => {})
+      v.removeEventListener('canplay', retry)
+    }
+    v.addEventListener('canplay', retry, { once: true })
+  })
+}
+
+function tryPlayDiamondVideo() {
+  if (!import.meta.client || prefersReducedMotion.value) return
+  playVideoEl(diamondVideoRef.value)
+  playVideoEl(mobileStackDiamondVideoRef.value)
+}
+
+/** Desktop: diamante desce/sobe na coluna direita, sincronizado com o scroll no bloco intro. */
+function setupDiamondIntroScroll() {
+  diamondIntroTween?.scrollTrigger?.kill()
+  diamondIntroTween?.kill()
+  diamondIntroTween = null
+
+  if (!import.meta.client || prefersReducedMotion.value || !mdUp.value) {
+    nextTick(() => {
+      if (diamondFloatWrapRef.value) gsap.set(diamondFloatWrapRef.value, { clearProps: 'transform' })
+    })
+    return
+  }
+
+  nextTick(() => {
+    const intro = introBlockRef.value
+    const textCol = introTextColRef.value
+    const floater = diamondFloatWrapRef.value
+    if (!intro || !textCol || !floater) return
+
+    gsap.killTweensOf(floater)
+    gsap.set(floater, { y: 0 })
+
+    /** Percurso vertical ampliado; scrub longo para acompanhar o scroll. */
+    const travel = () => {
+      const base = Math.max(0, textCol.offsetHeight - floater.offsetHeight)
+      return base * 1.58
+    }
+
+    diamondIntroTween = gsap.fromTo(
+      floater,
+      { y: 0 },
+      {
+        y: () => travel(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: intro,
+          start: 'top bottom',
+          end: () =>
+            `+=${(intro.offsetHeight + window.innerHeight) * 1.48}`,
+          scrub: 0.55,
+          invalidateOnRefresh: true
+        }
+      }
+    )
+    ScrollTrigger.refresh()
+  })
+}
+
 function bindIntroMotion() {
   tweens.forEach((tw) => {
     tw.scrollTrigger?.kill()
@@ -202,6 +275,25 @@ function setupParallaxST() {
   })
 }
 
+function bindIntroColResizeObserver() {
+  introColResizeRo?.disconnect()
+  introColResizeRo = null
+  if (!import.meta.client || typeof ResizeObserver === 'undefined') return
+  const col = introTextColRef.value
+  const intro = introBlockRef.value
+  if (!col || !intro) return
+  let raf = 0
+  const schedule = () => {
+    cancelAnimationFrame(raf)
+    raf = requestAnimationFrame(() => {
+      ScrollTrigger.refresh()
+    })
+  }
+  introColResizeRo = new ResizeObserver(schedule)
+  introColResizeRo.observe(col)
+  introColResizeRo.observe(intro)
+}
+
 onMounted(() => {
   if (import.meta.client) {
     const mqMd = window.matchMedia('(min-width: 768px)')
@@ -217,6 +309,9 @@ onMounted(() => {
   nextTick(() => {
     bindIntroMotion()
     setupParallaxST()
+    tryPlayDiamondVideo()
+    setupDiamondIntroScroll()
+    bindIntroColResizeObserver()
   })
 })
 
@@ -226,16 +321,51 @@ watch(
     nextTick(() => {
       bindIntroMotion()
       setupParallaxST()
+      setupDiamondIntroScroll()
+      bindIntroColResizeObserver()
       ScrollTrigger.refresh()
     })
   }
 )
 
+watch(
+  () => store.skills.length,
+  () => {
+    nextTick(() => {
+      setupDiamondIntroScroll()
+      bindIntroColResizeObserver()
+      ScrollTrigger.refresh()
+    })
+  }
+)
+
+watch(mdUp, () => {
+  nextTick(() => {
+    setupDiamondIntroScroll()
+    bindIntroColResizeObserver()
+    tryPlayDiamondVideo()
+    ScrollTrigger.refresh()
+  })
+})
+
+watch(prefersReducedMotion, () => {
+  nextTick(() => {
+    setupDiamondIntroScroll()
+    tryPlayDiamondVideo()
+    ScrollTrigger.refresh()
+  })
+})
+
 onUnmounted(() => {
+  introColResizeRo?.disconnect()
+  introColResizeRo = null
   mqCleanup?.()
   mqCleanup = null
   stParallax?.kill()
   stParallax = null
+  diamondIntroTween?.scrollTrigger?.kill()
+  diamondIntroTween?.kill()
+  diamondIntroTween = null
   tweens.forEach((tw) => {
     tw.scrollTrigger?.kill()
     tw.kill()
@@ -244,81 +374,164 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section :id="landing.story.sectionId" ref="rootRef" class="relative scroll-mt-24 overflow-x-hidden bg-bg py-16 md:py-24">
+  <section
+    :id="landing.story.sectionId"
+    ref="rootRef"
+    class="relative scroll-mt-24 overflow-x-clip overflow-y-visible bg-white pb-16 md:pb-24"
+  >
+    <!-- Intro: desktop = texto + coluna direita com diamante a mover com scroll; mobile = texto e vídeo estático -->
     <div
-      class="pointer-events-none absolute inset-x-0 top-0 h-[min(50vh,420px)] bg-gradient-to-b from-[#89aacc]/[0.06] via-transparent to-transparent"
-      aria-hidden="true"
-    />
+      ref="introBlockRef"
+      class="relative isolate z-[1] overflow-x-clip overflow-y-visible py-16 md:overflow-visible md:py-24"
+    >
+      <div
+        class="pointer-events-none absolute inset-x-0 top-0 z-[4] h-32 bg-gradient-to-b from-white via-white/75 to-transparent md:h-40"
+        aria-hidden="true"
+      />
+      <div
+        class="pointer-events-none absolute inset-y-0 left-0 z-[4] w-[min(100%,46rem)] md:max-w-[52rem]"
+        style="
+          background: linear-gradient(
+            to right,
+            #fff 0%,
+            rgba(255, 255, 255, 0.97) 18%,
+            rgba(255, 255, 255, 0.88) 36%,
+            rgba(255, 255, 255, 0.5) 58%,
+            rgba(255, 255, 255, 0.12) 78%,
+            transparent 100%
+          );
+        "
+        aria-hidden="true"
+      />
 
-    <div class="relative mx-auto max-w-[1280px] space-y-12 px-6 md:space-y-16 md:px-10 lg:px-14">
-      <div class="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(280px,42%)] lg:gap-14 xl:gap-16">
-        <div data-story-reveal class="max-w-xl lg:max-w-none">
-          <p class="mb-3 text-xs uppercase tracking-[0.3em] text-muted">
-            {{ landing.story.introEyebrow }}
-          </p>
-          <h2 class="text-3xl text-text-primary md:text-4xl">
-            {{ landing.story.introTitlePlain }}
-            <span class="font-display italic text-muted">{{ landing.story.introTitleItalic }}</span>
-          </h2>
-          <p class="mt-4 leading-relaxed text-muted">
-            {{ landing.story.introLead }}
-          </p>
-          <p class="mt-5 text-sm leading-relaxed text-text-primary/80 md:text-[15px]">
-            {{ serviceLine }}
-          </p>
-
-          <UiStackConstellation :skills="constellationSkills" class="mt-10" />
-        </div>
-
+      <div class="relative isolate z-10 mx-auto max-w-[1280px] px-6 md:px-10 lg:px-14">
         <div
-          data-story-reveal
-          class="relative mx-auto w-full max-w-md self-start lg:mx-0 lg:max-w-none lg:sticky lg:top-28"
+          class="grid grid-cols-1 items-stretch gap-0 md:grid-cols-[minmax(0,1fr)_clamp(17.5rem,38vw,32rem)] md:gap-x-8 lg:gap-x-12 xl:gap-x-14"
         >
           <div
-            class="relative isolate min-h-[320px] overflow-hidden rounded-3xl bg-gradient-to-br from-white via-[#f2f6fb] to-[#d2e3f5] p-6 shadow-[0_28px_70px_-32px_rgba(78,133,191,0.22)] sm:min-h-[400px] md:p-8 lg:min-h-[min(82vh,680px)] lg:p-10"
+            ref="introTextColRef"
+            data-story-reveal
+            class="relative z-40 max-w-xl lg:max-w-2xl"
           >
-            <div
-              class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_75%_at_50%_42%,rgba(255,255,255,0.55)_0%,rgba(137,170,204,0.14)_42%,rgba(78,133,191,0.08)_72%,transparent_100%)]"
-              aria-hidden="true"
-            />
-            <div
-              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#89aacc]/[0.07] via-transparent to-white/40"
-              aria-hidden="true"
-            />
-            <div
-              v-if="!prefersReducedMotion"
-              class="relative z-[1] flex min-h-[240px] items-center justify-center sm:min-h-[300px] lg:min-h-[min(68vh,560px)]"
+            <p class="mb-3 text-xs uppercase tracking-[0.3em] text-muted">
+              {{ landing.story.introEyebrow }}
+            </p>
+            <h2 class="text-3xl text-text-primary md:text-4xl">
+              {{ landing.story.introTitlePlain }}
+              <span class="font-display italic text-muted">{{ landing.story.introTitleItalic }}</span>
+            </h2>
+            <div class="mt-4 space-y-3.5 text-muted">
+              <p
+                v-for="(para, i) in landing.story.introParagraphs"
+                :key="i"
+                class="leading-relaxed first:mt-0"
+              >
+                {{ para }}
+              </p>
+            </div>
+            <p class="mb-2 mt-8 text-xs uppercase tracking-[0.3em] text-muted">
+              {{ landing.story.introWorkEyebrow }}
+            </p>
+            <ul
+              class="list-disc space-y-2 pl-5 text-sm leading-relaxed text-text-primary/80 marker:text-accent-soft/80 md:text-[15px]"
             >
-              <video
-                :src="landing.story.introVideoSrc"
-                class="h-auto w-full max-w-none object-contain object-center [transform:translateZ(0)] scale-[1.18] sm:scale-[1.24] md:scale-[1.32] lg:max-h-[min(74vh,600px)] lg:scale-[1.38]"
-                autoplay
-                loop
-                muted
-                playsinline
-                preload="auto"
-                disablepictureinpicture
-                tabindex="-1"
-                aria-label="Vídeo em loop na seção Sobre"
+              <li v-for="(item, i) in landing.story.introWorkBullets" :key="i">
+                {{ item }}
+              </li>
+            </ul>
+
+            <!-- Mobile: diamante atrás das stacks (painel transparente nas stacks até md) -->
+            <div class="relative mt-10 min-h-[min(52vw,280px)] md:min-h-0">
+              <div
+                v-if="!prefersReducedMotion"
+                class="pointer-events-none absolute inset-x-0 bottom-[-8%] top-[-18%] z-[1] md:hidden"
+                aria-hidden="true"
+              >
+                <video
+                  ref="mobileStackDiamondVideoRef"
+                  class="absolute left-1/2 top-[50%] h-[min(480px,120vw)] w-[min(820px,260vw)] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain opacity-[0.55] will-change-transform"
+                  :src="landing.story.introVideoSrc"
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  webkit-playsinline
+                  preload="auto"
+                  disablepictureinpicture
+                  tabindex="-1"
+                  @loadeddata="tryPlayDiamondVideo"
+                />
+                <!-- Leve vinheta: texto/pills legíveis sem esconder o diamante -->
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-white/90 via-white/25 to-white/60"
+                />
+                <div
+                  class="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/35 to-transparent"
+                />
+              </div>
+              <UiStackConstellation
+                over-backdrop
+                :skills="constellationSkills"
+                class="relative z-[2]"
               />
             </div>
+          </div>
+
+          <div
+            ref="diamondRailRef"
+            class="relative z-[5] hidden min-h-0 md:mt-0 md:flex md:h-full md:min-h-0 md:items-stretch md:justify-end md:overflow-visible md:pl-0"
+          >
+            <!-- Garante altura da célula = coluna do texto (filho absolute não estica o pai) -->
             <div
-              v-else
-              class="relative z-[1] flex min-h-[280px] flex-col items-center justify-center gap-2 px-6 text-center sm:min-h-[320px] lg:min-h-[min(60vh,480px)]"
+              class="pointer-events-none hidden w-px shrink-0 md:block md:h-full md:min-h-[1px]"
+              aria-hidden="true"
+            />
+            <div
+              ref="diamondFloatWrapRef"
+              class="pointer-events-none relative z-[5] flex w-full justify-center will-change-transform [transform:translateZ(0)] md:absolute md:inset-x-0 md:top-0 md:w-full md:justify-center"
             >
-              <Icon icon="lucide:clapperboard" class="h-10 w-10 text-[#4e85bf]/55" />
-              <p class="text-xs font-medium uppercase tracking-[0.28em] text-muted">Vídeo pausado</p>
-              <p class="max-w-[12rem] text-[11px] leading-relaxed text-muted/90">
-                Animação desativada nas suas preferências de acessibilidade.
-              </p>
+              <div class="relative z-[5] shrink-0">
+                <div
+                  class="pointer-events-none absolute -left-4 top-[8%] bottom-[8%] z-[5] w-28 bg-gradient-to-r from-white via-white/85 to-transparent blur-[0.5px] md:-left-6 md:w-40 md:from-white md:via-white/70 lg:-left-10 lg:w-48"
+                  aria-hidden="true"
+                />
+                <video
+                  v-if="!prefersReducedMotion"
+                  ref="diamondVideoRef"
+                  class="relative z-[5] h-auto w-[min(88vw,420px)] object-contain object-center [transform:translateZ(0)] scale-[1.12] sm:w-[min(86vw,460px)] sm:scale-[1.15] md:h-[min(96vh,920px)] md:w-auto md:max-w-[min(130vw,960px)] md:scale-[1.22] lg:scale-[1.28]"
+                  :src="landing.story.introVideoSrc"
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  webkit-playsinline
+                  preload="auto"
+                  disablepictureinpicture
+                  tabindex="-1"
+                  aria-label="Vídeo em loop na seção Como penso"
+                  @loadeddata="tryPlayDiamondVideo"
+                />
+                <div
+                  v-else
+                  class="flex aspect-[3/4] w-[min(88vw,320px)] flex-col items-center justify-center rounded-2xl border border-stroke/20 bg-gradient-to-b from-[#eef4fa]/90 to-white"
+                >
+                  <Icon icon="lucide:clapperboard" class="h-10 w-10 text-accent/50" />
+                  <p class="mt-2 text-[10px] font-medium uppercase tracking-[0.26em] text-muted">
+                    Vídeo pausado
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Timeline + pin: largura da viewport (vídeo/parallax full-bleed); intro acima continua em max-w-[1280px] -->
-    <div class="relative w-full border-t border-stroke/40 pt-12 md:pt-16">
+    <!-- Timeline + pin: fundo opaco para não misturar com o vídeo da intro -->
+    <div
+      :id="landing.story.timelineAnchorId"
+      class="relative z-[20] mt-14 w-full scroll-mt-24 border-t border-stroke/40 bg-white pt-12 md:mt-16 md:pt-16"
+    >
       <div class="mx-auto w-full max-w-[1280px] px-6 md:px-10 lg:px-14">
         <div class="mx-auto mb-8 max-w-3xl text-center md:mb-10" data-story-reveal>
           <p class="mb-2 text-[10px] uppercase tracking-[0.32em] text-muted md:text-xs">

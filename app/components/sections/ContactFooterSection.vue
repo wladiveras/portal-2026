@@ -108,13 +108,23 @@ onUnmounted(() => {
           <p class="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted md:text-base">
             {{ landing.contact.ctaDescription }}
           </p>
-          <a
-            :href="`mailto:${landing.contact.email}`"
-            class="mt-10 inline-flex rounded-full bg-text-primary px-10 py-4 text-base text-white shadow-lg transition-transform duration-300 hover:scale-[1.03] md:px-14 md:py-5"
-          >
-            {{ landing.contact.ctaButtonLabel }}
-          </a>
-          <p class="mt-4 text-xs text-muted">{{ landing.contact.email }}</p>
+          <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <a
+              :href="landing.contact.whatsappHref"
+              target="_blank"
+              rel="noreferrer"
+              class="inline-flex rounded-full bg-text-primary px-8 py-4 text-base text-white shadow-lg transition-transform duration-300 hover:scale-[1.03] md:px-10 md:py-4"
+            >
+              {{ landing.contact.ctaButtonLabel }}
+            </a>
+            <a
+              :href="`mailto:${landing.contact.email}`"
+              class="inline-flex rounded-full border border-stroke/80 bg-white px-8 py-4 text-base text-text-primary shadow-sm transition-transform duration-300 hover:scale-[1.03] md:px-10 md:py-4"
+            >
+              {{ landing.contact.ctaButtonEmailLabel }}
+            </a>
+          </div>
+          <p class="mt-4 text-xs text-muted">{{ landing.contact.whatsappNumber }} · {{ landing.contact.email }}</p>
         </div>
       </div>
 
@@ -130,7 +140,7 @@ onUnmounted(() => {
             rel="noreferrer"
             class="inline-flex items-center gap-2 rounded-full border border-stroke/70 bg-white/55 px-4 py-2.5 text-muted shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-[#89aacc]/45 hover:text-text-primary hover:shadow-md"
           >
-            <Icon :icon="s.icon" class="h-4 w-4 shrink-0" />
+            <Icon :icon="s.icon" class="h-4 w-4 shrink-0 text-text-primary/90" />
             {{ s.label }}
           </a>
         </div>

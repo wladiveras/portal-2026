@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import type { PortfolioData } from '~/types/portfolio'
 
+/** Evita chamadas paralelas; permite `loading: true` inicial sem bloquear o primeiro fetch. */
+let portfolioFetchInFlight: Promise<void> | null = null
+
 const emptyAbout: PortfolioData['about'] = {
   headline: '',
   title: '',
@@ -17,7 +20,8 @@ export const usePortfolioStore = defineStore('portfolio', {
     experience: [],
     projects: [],
     testimonials: [],
-    loading: false,
+    /** true até o primeiro `/api/portfolio` no cliente — alinha SSR e hidratação com o plugin `.client`. */
+    loading: true,
     error: null
   }),
 
@@ -38,24 +42,28 @@ export const usePortfolioStore = defineStore('portfolio', {
 
   actions: {
     async fetchPortfolioData() {
-      if (this.loading) return
+      if (portfolioFetchInFlight) return portfolioFetchInFlight
       this.loading = true
       this.error = null
-      try {
-        const data = await $fetch<PortfolioData>('/api/portfolio')
-        this.careerStartYear = data.careerStartYear
-        this.about = data.about
-        this.skills = data.skills
-        this.experience = data.experience
-        this.projects = data.projects
-        this.testimonials = data.testimonials
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : 'Falha ao carregar portfólio'
-        this.error = msg
-        console.error(e)
-      } finally {
-        this.loading = false
-      }
+      portfolioFetchInFlight = (async () => {
+        try {
+          const data = await $fetch<PortfolioData>('/api/portfolio')
+          this.careerStartYear = data.careerStartYear
+          this.about = data.about
+          this.skills = data.skills
+          this.experience = data.experience
+          this.projects = data.projects
+          this.testimonials = data.testimonials
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : 'Falha ao carregar portfólio'
+          this.error = msg
+          console.error(e)
+        } finally {
+          this.loading = false
+          portfolioFetchInFlight = null
+        }
+      })()
+      return portfolioFetchInFlight
     }
   }
 })
