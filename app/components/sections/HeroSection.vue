@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import gsap from 'gsap'
 import { landing } from '~/data/landing'
+import { getLenis } from '~/utils/lenis'
 
 const store = usePortfolioStore()
 const roles = [...landing.hero.roles]
@@ -12,6 +13,7 @@ const sectionRef = ref<HTMLElement | null>(null)
 const progress = ref(0)
 const viewportHeight = ref(1080)
 const pinDistance = ref(2200)
+let lenisUnsubscribe: (() => void) | null = null
 
 const updateHeroProgress = () => {
   if (!sectionRef.value) return
@@ -34,7 +36,18 @@ onMounted(() => {
   updateViewport()
   updateHeroProgress()
   window.addEventListener('resize', updateViewport, { passive: true })
-  window.addEventListener('scroll', updateHeroProgress, { passive: true })
+  const lenis = getLenis()
+  if (lenis) {
+    const onLenisScroll = () => {
+      updateHeroProgress()
+    }
+    lenis.on('scroll', onLenisScroll)
+    lenisUnsubscribe = () => {
+      lenis.off('scroll', onLenisScroll)
+    }
+  } else {
+    window.addEventListener('scroll', updateHeroProgress, { passive: true })
+  }
 
   roleInterval = window.setInterval(() => {
     roleIndex.value = (roleIndex.value + 1) % roles.length
@@ -54,6 +67,8 @@ onUnmounted(() => {
   clearInterval(roleInterval)
   window.removeEventListener('resize', updateViewport)
   window.removeEventListener('scroll', updateHeroProgress)
+  lenisUnsubscribe?.()
+  lenisUnsubscribe = null
 })
 </script>
 

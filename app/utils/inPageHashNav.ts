@@ -1,3 +1,5 @@
+import { getLenis } from '~/utils/lenis'
+
 /**
  * Scroll suave para IDs na mesma página (âncoras #). Ajuda no SPA onde o
  * comportamento nativo de hash nem sempre alinha bem com o layout.
@@ -12,8 +14,20 @@ export function navigateToHash(
   const el = document.getElementById(id)
   if (!el) return false
 
-  const block: ScrollLogicalPosition = id === 'contact-cta' ? 'center' : 'start'
-  el.scrollIntoView({ behavior: 'smooth', block, inline: 'nearest' })
+  const lenis = getLenis()
+  if (lenis) {
+    const isContactCta = id === 'contact-cta'
+    const targetHeight = el.getBoundingClientRect().height
+    const centerOffset = -Math.max((window.innerHeight - targetHeight) / 2, 0)
+
+    lenis.scrollTo(el, {
+      duration: 1.1,
+      offset: isContactCta ? centerOffset : 0
+    })
+  } else {
+    const block: ScrollLogicalPosition = id === 'contact-cta' ? 'center' : 'start'
+    el.scrollIntoView({ behavior: 'smooth', block, inline: 'nearest' })
+  }
 
   if (options?.updateHistory !== false && history.replaceState) {
     history.replaceState(null, '', href)
