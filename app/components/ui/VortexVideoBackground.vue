@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useHlsVideo } from '~/composables/useHlsVideo'
 import { useReducedMotion } from '~/composables/useReducedMotion'
 import { useScrollVideo } from '~/composables/useScrollVideo'
+import { getMotionProfile } from '~/utils/motionProfile'
 
 const props = defineProps<{
   localSrc: string
@@ -21,7 +22,11 @@ const { attach } = useHlsVideo(videoRef)
 const { prefersReducedMotion } = useReducedMotion()
 const externalProgress = computed(() => props.progress)
 
-useScrollVideo(videoRef, { smoothing: 0.14, externalProgress })
+const videoPreload = computed(() =>
+  import.meta.client ? getMotionProfile().heroVideoPreload : 'metadata'
+)
+
+useScrollVideo(videoRef, { externalProgress })
 
 onMounted(() => {
   if (!videoRef.value) return
@@ -48,7 +53,7 @@ onMounted(() => {
       muted
       playsinline
       disablepictureinpicture
-      preload="metadata"
+      :preload="videoPreload"
       class="pointer-events-none absolute left-1/2 top-1/2 h-full w-full min-h-full min-w-full max-w-none object-cover object-[44%_46%] max-md:object-[42%_48%]"
       :style="{
         transform: mirrored

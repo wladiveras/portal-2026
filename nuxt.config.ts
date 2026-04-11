@@ -7,7 +7,11 @@ export default defineNuxtConfig({
   nitro: {
     publicAssets: [
       {
-        dir: 'public',
+        dir: 'media',
+        maxAge: 60 * 60 * 24 * 365
+      },
+      {
+        dir: '.',
         maxAge: 60 * 60 * 24 * 7
       }
     ]

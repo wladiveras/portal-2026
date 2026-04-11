@@ -7,11 +7,13 @@ const isLoading = ref(true)
 <template>
   <main>
     <SectionsLoadingScreen v-if="isLoading" @complete="isLoading = false" />
-    <SectionsHeroSection />
-    <UiFloatingNav />
-    <SectionsStorySection />
-    <SectionsSelectedWorksSection />
-    <SectionsTestimonialsSection />
-    <SectionsContactFooterSection />
+    <template v-if="!isLoading">
+      <SectionsHeroSection />
+      <UiFloatingNav />
+      <SectionsStorySection />
+      <SectionsSelectedWorksSection />
+      <SectionsTestimonialsSection />
+      <SectionsContactFooterSection />
+    </template>
   </main>
 </template>

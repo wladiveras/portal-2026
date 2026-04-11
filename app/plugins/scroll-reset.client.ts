@@ -1,25 +1,27 @@
 import { getLenis } from '~/utils/lenis'
+import { navigateToHash } from '~/utils/inPageHashNav'
 
 export default defineNuxtPlugin(() => {
   if ('scrollRestoration' in window.history) {
     window.history.scrollRestoration = 'manual'
   }
 
-  // Force entry point at hero on full refresh.
-  if (window.location.hash) {
-    window.history.replaceState(
-      window.history.state,
-      '',
-      `${window.location.pathname}${window.location.search}`
-    )
-  }
-
   window.requestAnimationFrame(() => {
     const lenis = getLenis()
-    if (lenis) {
-      lenis.scrollTo(0, { immediate: true, force: true })
-      return
+    const scrollToTop = () => {
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: true, force: true })
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      }
     }
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+
+    // Se há hash na URL, tenta scroll até a seção; senão, volta ao topo.
+    if (window.location.hash) {
+      const navigated = navigateToHash(window.location.hash)
+      if (!navigated) scrollToTop()
+    } else {
+      scrollToTop()
+    }
   })
 })

@@ -4,8 +4,6 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { landing } from '~/data/landing'
 
-gsap.registerPlugin(ScrollTrigger)
-
 const store = usePortfolioStore()
 const sectionRef = ref<HTMLElement | null>(null)
 const headerRef = ref<HTMLElement | null>(null)

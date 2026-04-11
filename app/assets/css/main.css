@@ -76,3 +76,16 @@ body {
   filter: blur(10px);
   transform: translate3d(0, 20px, 0);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .name-reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .blur-in {
+    opacity: 1;
+    filter: blur(0px);
+    transform: none;
+  }
+}

@@ -3,6 +3,8 @@ import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import gsap from 'gsap'
 import { landing } from '~/data/landing'
 import { useReducedMotion } from '~/composables/useReducedMotion'
+import { waitForVideoCanPlay } from '~/utils/criticalMediaReady'
+import { playVideoEl } from '~/utils/playVideoEl'
 
 const emit = defineEmits<{ complete: [] }>()
 
@@ -31,16 +33,7 @@ const videoRef = ref<HTMLVideoElement | null>(null)
 
 function tryPlayLoadingVideo() {
   if (!import.meta.client || prefersReducedMotion.value) return
-  const v = videoRef.value
-  if (!v) return
-  v.muted = true
-  void v.play().catch(() => {
-    const retry = () => {
-      void v.play().catch(() => {})
-      v.removeEventListener('canplay', retry)
-    }
-    v.addEventListener('canplay', retry, { once: true })
-  })
+  playVideoEl(videoRef.value)
 }
 
 function triggerCountPulse() {
@@ -53,6 +46,52 @@ function triggerCountPulse() {
 
 let lastRounded = 0
 
+const HERO_VIDEO_READY_MS = 5500
+
+function runSplashMinimum(): Promise<void> {
+  return new Promise((resolve) => {
+    if (prefersReducedMotion.value) {
+      const start = performance.now()
+      const tick = (time: number) => {
+        const t = Math.min((time - start) / (DURATION_S * 1000), 1)
+        const next = Math.round(t * 100)
+        if (next !== lastRounded) {
+          lastRounded = next
+          count.value = next
+          triggerCountPulse()
+        }
+        if (t < 1) {
+          rafId = requestAnimationFrame(tick)
+        } else {
+          count.value = 100
+          completeTimer = window.setTimeout(() => resolve(), OUT_MS)
+        }
+      }
+      rafId = requestAnimationFrame(tick)
+      return
+    }
+
+    const proxy = { n: 0 }
+    gsapTween = gsap.to(proxy, {
+      n: 100,
+      duration: DURATION_S,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        const next = Math.round(proxy.n)
+        if (next !== lastRounded) {
+          lastRounded = next
+          triggerCountPulse()
+        }
+        count.value = next
+      },
+      onComplete: () => {
+        count.value = 100
+        completeTimer = window.setTimeout(() => resolve(), OUT_MS)
+      }
+    })
+  })
+}
+
 onMounted(() => {
   let index = 0
   wordInterval = window.setInterval(() => {
@@ -60,45 +99,10 @@ onMounted(() => {
     activeWord.value = words[index]!
   }, WORD_MS)
 
-  if (prefersReducedMotion.value) {
-    const start = performance.now()
-    const tick = (time: number) => {
-      const t = Math.min((time - start) / (DURATION_S * 1000), 1)
-      const next = Math.round(t * 100)
-      if (next !== lastRounded) {
-        lastRounded = next
-        count.value = next
-        triggerCountPulse()
-      }
-      if (t < 1) {
-        rafId = requestAnimationFrame(tick)
-      } else {
-        count.value = 100
-        completeTimer = window.setTimeout(() => emit('complete'), OUT_MS)
-      }
-    }
-    rafId = requestAnimationFrame(tick)
-    return
-  }
-
-  const proxy = { n: 0 }
-  gsapTween = gsap.to(proxy, {
-    n: 100,
-    duration: DURATION_S,
-    ease: 'power2.inOut',
-    onUpdate: () => {
-      const next = Math.round(proxy.n)
-      if (next !== lastRounded) {
-        lastRounded = next
-        triggerCountPulse()
-      }
-      count.value = next
-    },
-    onComplete: () => {
-      count.value = 100
-      completeTimer = window.setTimeout(() => emit('complete'), OUT_MS)
-    }
-  })
+  void Promise.all([
+    runSplashMinimum(),
+    waitForVideoCanPlay(landing.hero.vortexVideoSrc, HERO_VIDEO_READY_MS)
+  ]).then(() => emit('complete'))
 
   void nextTick(() => tryPlayLoadingVideo())
 })

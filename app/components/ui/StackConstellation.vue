@@ -3,8 +3,6 @@ import { computed, onMounted, onUnmounted, ref, watch, nextTick, useId } from 'v
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(ScrollTrigger)
-
 const props = withDefaults(
   defineProps<{
     skills: string[]

@@ -2,6 +2,7 @@ import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { getLenis } from '~/utils/lenis'
+import { getMotionProfile } from '~/utils/motionProfile'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -13,14 +14,19 @@ export default defineNuxtPlugin(() => {
 
   if (getLenis()) return
 
+  const { lenis: lenisOpts } = getMotionProfile()
+
   const lenis = new Lenis({
-    wheelMultiplier: 0.76,
-    touchMultiplier: 0.84,
-    smoothWheel: true,
-    lerp: 0.082,
+    wheelMultiplier: lenisOpts.wheelMultiplier,
+    touchMultiplier: lenisOpts.touchMultiplier,
+    smoothWheel: lenisOpts.smoothWheel,
+    lerp: lenisOpts.lerp,
+    syncTouch: lenisOpts.syncTouch,
+    ...(lenisOpts.syncTouch ? { syncTouchLerp: 0.11, touchInertiaExponent: 1.45 } : {}),
     autoRaf: false,
     anchors: true,
-    autoResize: true
+    autoResize: true,
+    stopInertiaOnNavigate: true
   })
 
   const ticker = (time: number) => {

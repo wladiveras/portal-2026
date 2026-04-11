@@ -5,8 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { landing } from '~/data/landing'
 import type { LandingStatKey } from '~/data/landing'
 
-gsap.registerPlugin(ScrollTrigger)
-
 const store = usePortfolioStore()
 const rootRef = ref<HTMLElement | null>(null)
 const statsRowRef = ref<HTMLElement | null>(null)

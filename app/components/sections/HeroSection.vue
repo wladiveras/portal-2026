@@ -3,8 +3,10 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import gsap from 'gsap'
 import { landing } from '~/data/landing'
 import { getLenis } from '~/utils/lenis'
+import { useReducedMotion } from '~/composables/useReducedMotion'
 
 const store = usePortfolioStore()
+const { prefersReducedMotion } = useReducedMotion()
 const roles = [...landing.hero.roles]
 const tagline = computed(() => store.about.summary?.trim() || landing.hero.taglineFallback)
 const roleIndex = ref(0)
@@ -53,14 +55,18 @@ onMounted(() => {
     roleIndex.value = (roleIndex.value + 1) % roles.length
   }, 2000)
 
-  gsap
-    .timeline({ defaults: { ease: 'power3.out' } })
-    .to('.name-reveal', { opacity: 1, y: 0, duration: 0.88, delay: 0.08 })
-    .to(
-      '.blur-in',
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.72, stagger: 0.08, delay: 0.22 },
-      '-=0.8'
-    )
+  if (!prefersReducedMotion.value) {
+    gsap
+      .timeline({ defaults: { ease: 'power3.out' } })
+      .to('.name-reveal', { opacity: 1, y: 0, duration: 0.88, delay: 0.08 })
+      .to(
+        '.blur-in',
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.72, stagger: 0.08, delay: 0.22 },
+        '-=0.8'
+      )
+  } else {
+    gsap.set('.name-reveal, .blur-in', { opacity: 1, y: 0, filter: 'blur(0px)' })
+  }
 })
 
 onUnmounted(() => {
@@ -81,7 +87,7 @@ onUnmounted(() => {
   >
     <div class="sticky top-0 flex h-[100dvh] items-center justify-center overflow-hidden">
       <UiVortexVideoBackground
-        local-src="/media/Male_character_disintegrates_202603310008_keyframe.mp4"
+        :local-src="landing.hero.vortexVideoSrc"
         poster="/media/Gemini_Generated_Image_6ve8py6ve8py6ve8.png"
         :progress="progress"
         @meta="onVideoMeta"

@@ -5,8 +5,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { landing } from '~/data/landing'
 import { useReducedMotion } from '~/composables/useReducedMotion'
-
-gsap.registerPlugin(ScrollTrigger)
+import { playVideoEl } from '~/utils/playVideoEl'
 
 /** Mais longos = sumiço/reaparição do loop mais suave */
 const LOOP_FADE_OUT_S = 0.95
@@ -150,18 +149,6 @@ function timelineDotTop(ti: number, total: number) {
   const start = 13
   const span = 68
   return `${start + (ti / (total - 1)) * span}%`
-}
-
-function playVideoEl(v: HTMLVideoElement | null) {
-  if (!v) return
-  v.muted = true
-  void v.play().catch(() => {
-    const retry = () => {
-      void v.play().catch(() => {})
-      v.removeEventListener('canplay', retry)
-    }
-    v.addEventListener('canplay', retry, { once: true })
-  })
 }
 
 function tryPlayDiamondVideo() {
@@ -807,28 +794,24 @@ onUnmounted(() => {
 .job-swap-enter-active,
 .job-swap-leave-active {
   transition:
-    opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.32s ease;
+    opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .job-swap-enter-from {
   opacity: 0;
-  transform: translateY(1.35rem) scale(0.985);
-  filter: blur(3px);
+  transform: translateY(0.75rem) scale(0.992);
 }
 
 .job-swap-leave-to {
   opacity: 0;
-  transform: translateY(-1.1rem) scale(0.985);
-  filter: blur(2px);
+  transform: translateY(-0.55rem) scale(0.992);
 }
 
 .job-swap-enter-to,
 .job-swap-leave-from {
   opacity: 1;
   transform: translateY(0) scale(1);
-  filter: blur(0);
 }
 
 @media (prefers-reduced-motion: reduce) {

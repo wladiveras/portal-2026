@@ -6,8 +6,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { landing } from '~/data/landing'
 import { useCinematicLoopVideo } from '~/composables/useCinematicLoopVideo'
 
-gsap.registerPlugin(ScrollTrigger)
-
 const videoRef = ref<HTMLVideoElement | null>(null)
 const { opacity } = useCinematicLoopVideo(videoRef, { fadeSec: 0.5, restartDelayMs: 100 })
 
@@ -65,7 +63,7 @@ onUnmounted(() => {
           :src="landing.contact.ctaVideoSrc"
           muted
           playsinline
-          preload="auto"
+          preload="metadata"
           :style="{ opacity: opacity }"
         />
       </div>

@@ -15,6 +15,7 @@ function cafSafe(id: number) {
 
 /**
  * Loop manual com fade no início/fim do clip (sem corte seco).
+ * Pausa o rAF quando o vídeo sai da viewport (IntersectionObserver).
  * Só corre no cliente (evita SSR sem window).
  */
 export function useCinematicLoopVideo(
@@ -28,6 +29,8 @@ export function useCinematicLoopVideo(
   let raf = 0
   let cancelled = false
   let boundEl: HTMLVideoElement | null = null
+  let observer: IntersectionObserver | null = null
+  let isVisible = true
 
   const onEnded = () => {
     if (cancelled || !boundEl || !import.meta.client) return
@@ -41,8 +44,8 @@ export function useCinematicLoopVideo(
 
   const tick = () => {
     if (cancelled || !import.meta.client) return
+    if (!isVisible) return
     const el = boundEl
-    // duration pode ser NaN/0 antes de loadedmetadata — sem isto a opacidade fica 0 para sempre
     if (!el || !Number.isFinite(el.duration) || el.duration <= 0) {
       if (el && el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
         opacity.value = 1
@@ -66,10 +69,18 @@ export function useCinematicLoopVideo(
     raf = rafNow(tick)
   }
 
+  const kickLoop = () => {
+    if (!isVisible || cancelled) return
+    cafSafe(raf)
+    raf = rafNow(tick)
+  }
+
   const stop = () => {
     cancelled = true
     cafSafe(raf)
     raf = 0
+    observer?.disconnect()
+    observer = null
     if (boundEl) {
       boundEl.removeEventListener('ended', onEnded)
       boundEl = null
@@ -86,6 +97,17 @@ export function useCinematicLoopVideo(
     el.muted = true
     el.playsInline = true
     el.addEventListener('ended', onEnded)
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries.some((e) => e.isIntersecting)
+        if (isVisible) kickLoop()
+        else cafSafe(raf)
+      },
+      { rootMargin: '200px' }
+    )
+    observer.observe(el)
+
     raf = rafNow(tick)
     void el.play().catch(() => {})
   }

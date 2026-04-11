@@ -9,6 +9,6 @@
 
 <style scoped>
 .app-root {
-  min-height: 100%;
+  min-height: 100dvh;
 }
 </style>
