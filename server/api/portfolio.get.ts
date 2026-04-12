@@ -1,3 +1,5 @@
+import { defineEventHandler } from 'h3'
+
 export default defineEventHandler(() => {
   return {
     careerStartYear: 2020,
