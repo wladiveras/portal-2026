@@ -27,3 +27,10 @@ Plans:
 - [x] `03-04-PLAN.md` — Composable tests (`useReducedMotion`, `useGsapCleanup`)
 - [x] `03-05-PLAN.md` — Playwright install, config, landing E2E spec
 - [x] `03-06-PLAN.md` — GitHub Actions CI + manual UAT checkpoint
+
+---
+
+## Depois da fase 03
+
+1. Push + CI verde; executar **TEST-06** (vídeo / motion) uma vez.
+2. Escolher próximo incremento de produto e registar como **fase 04** aqui ou via fluxo GSD (`$gsd-add-phase`, `$gsd-plan-phase`).
