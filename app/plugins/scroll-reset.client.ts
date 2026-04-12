@@ -1,5 +1,9 @@
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { getLenis } from '~/utils/lenis'
 import { navigateToHash } from '~/utils/inPageHashNav'
+
+gsap.registerPlugin(ScrollTrigger)
 
 export default defineNuxtPlugin(() => {
   if ('scrollRestoration' in window.history) {
@@ -23,5 +27,10 @@ export default defineNuxtPlugin(() => {
     } else {
       scrollToTop()
     }
+
+    requestAnimationFrame(() => {
+      lenis?.resize()
+      ScrollTrigger.refresh()
+    })
   })
 })

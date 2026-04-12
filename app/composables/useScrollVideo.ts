@@ -150,12 +150,6 @@ export const useScrollVideo = (
 
     if (videoRef.value) observer.observe(videoRef.value)
 
-    // Ensure video is playing — iOS/touch devices require explicit play()
-    const el = videoRef.value
-    if (el && el.paused) {
-      el.play().catch(() => { /* autoplay blocked; scroll will still scrub frames */ })
-    }
-
     // Subscribe to Lenis scroll events — native window scroll may not fire
     // reliably on mobile touch when Lenis consumes the touch gesture.
     const lenis = getLenis()

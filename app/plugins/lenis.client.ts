@@ -37,9 +37,28 @@ export default defineNuxtPlugin(() => {
   gsap.ticker.add(ticker)
   gsap.ticker.lagSmoothing(0)
 
+  const root = document.documentElement
+  ScrollTrigger.scrollerProxy(root, {
+    scrollTop(value) {
+      if (arguments.length && typeof value === 'number') {
+        lenis.scrollTo(value, { immediate: true })
+      }
+      return lenis.scroll
+    },
+    getBoundingClientRect() {
+      return {
+        top: 0,
+        left: 0,
+        width: window.innerWidth,
+        height: window.innerHeight
+      }
+    }
+  })
+
   window.__portalLenis = lenis
 
   requestAnimationFrame(() => {
+    lenis.resize()
     ScrollTrigger.refresh()
   })
 })

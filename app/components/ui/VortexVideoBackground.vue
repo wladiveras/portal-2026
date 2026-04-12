@@ -39,6 +39,13 @@ onMounted(() => {
     { once: true }
   )
 
+  // "Wake" the video for mobile: play then immediately pause at 0.
+  // This enables currentTime seeking without letting frames advance on their own.
+  if (!prefersReducedMotion.value) {
+    const v = videoRef.value
+    v.play().then(() => { v.currentTime = 0; v.pause() }).catch(() => {})
+  }
+
   if (prefersReducedMotion.value) return
   if (props.hlsSrc) attach(props.hlsSrc)
 })
@@ -51,7 +58,6 @@ onMounted(() => {
       :src="localSrc"
       :poster="poster"
       muted
-      autoplay
       playsinline
       disablepictureinpicture
       :preload="videoPreload"

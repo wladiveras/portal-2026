@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { landing } from '~/data/landing'
 import { getLenis } from '~/utils/lenis'
 import { useReducedMotion } from '~/composables/useReducedMotion'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const initialPinDistance = Math.max(1800, landing.hero.vortexApproxDurationSec * 900)
 
 const store = usePortfolioStore()
 const { prefersReducedMotion } = useReducedMotion()
@@ -14,7 +19,7 @@ let roleInterval = 0
 const sectionRef = ref<HTMLElement | null>(null)
 const progress = ref(0)
 const viewportHeight = ref(1080)
-const pinDistance = ref(2200)
+const pinDistance = ref(initialPinDistance)
 let lenisUnsubscribe: (() => void) | null = null
 
 const updateHeroProgress = () => {
@@ -29,9 +34,13 @@ const updateViewport = () => {
   viewportHeight.value = window.innerHeight
 }
 
-const onVideoMeta = (duration: number) => {
-  // Use duration to size the pinned scroll window.
-  pinDistance.value = Math.max(1800, duration * 900)
+const onVideoMeta = async (duration: number) => {
+  const next = Math.max(1800, duration * 900)
+  pinDistance.value = Math.max(pinDistance.value, next)
+  await nextTick()
+  getLenis()?.resize()
+  ScrollTrigger.refresh()
+  updateHeroProgress()
 }
 
 onMounted(() => {

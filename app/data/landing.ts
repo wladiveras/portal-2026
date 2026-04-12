@@ -40,6 +40,8 @@ export const landing = {
   hero: {
     /** Vídeo do hero (scroll-sync); SSOT para preload no loading e URL única. */
     vortexVideoSrc: '/media/Male_character_disintegrates_202603310008_keyframe.mp4',
+    /** Duração aproximada (s) do clip para pin inicial estável antes de `loadedmetadata`. */
+    vortexApproxDurationSec: 9,
     collectionEyebrow: 'Version 2026',
     name: 'Wladi Veras',
     roles: ['Laravel', 'Gemini', 'Claude', 'LLM', 'RAG', 'MySQL', 'Redis', 'RabbitMQ', 'Nuxt', 'Vue', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind', 'Git'],
