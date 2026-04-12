@@ -37,17 +37,17 @@ function profileFromWindow(w: Window): MotionProfile {
       shouldUseHeavySmoothScroll: false,
       heroVideoPreload: 'auto',
       lenis: {
-        lerp: 0.14,
+        lerp: 0.1,
         wheelMultiplier: 0.76,
-        touchMultiplier: 0.52,
+        touchMultiplier: 0.4,
         smoothWheel: true,
-        syncTouch: true
+        syncTouch: false
       },
       scrollVideo: {
-        smoothing: 0.22,
-        seekMinIntervalMs: 48,
-        progressEpsilon: 0.0025,
-        timeSettleEpsilon: 0.04
+        smoothing: 0.18,
+        seekMinIntervalMs: 56,
+        progressEpsilon: 0.003,
+        timeSettleEpsilon: 0.05
       }
     }
   }

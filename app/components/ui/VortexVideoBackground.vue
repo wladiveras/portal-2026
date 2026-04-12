@@ -51,6 +51,7 @@ onMounted(() => {
       :src="localSrc"
       :poster="poster"
       muted
+      autoplay
       playsinline
       disablepictureinpicture
       :preload="videoPreload"

@@ -24,6 +24,10 @@ export default defineNuxtConfig({
           name: 'description',
           content:
             'Portfolio autoral com foco em design premium, engenharia fullstack e experiencias digitais.'
+        },
+        {
+          name: 'viewport',
+          content: 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover'
         }
       ]
     }

@@ -1,5 +1,6 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import type { Ref } from 'vue'
+import { getLenis } from '~/utils/lenis'
 import { getMotionProfile } from '~/utils/motionProfile'
 
 type ScrollVideoOptions = {
@@ -34,6 +35,7 @@ export const useScrollVideo = (
   let lastProgressSample = -1
   let metaWaitFrames = 0
   let observer: IntersectionObserver | null = null
+  let lenisScrollOff: (() => void) | null = null
 
   const updateProgress = () => {
     if (options.externalProgress && options.externalProgress.value !== undefined) {
@@ -143,10 +145,30 @@ export const useScrollVideo = (
         if (isActive.value) kick()
         else stopLoop()
       },
-      { threshold: 0.05 }
+      { threshold: 0, rootMargin: '50% 0px 50% 0px' }
     )
 
     if (videoRef.value) observer.observe(videoRef.value)
+
+    // Ensure video is playing — iOS/touch devices require explicit play()
+    const el = videoRef.value
+    if (el && el.paused) {
+      el.play().catch(() => { /* autoplay blocked; scroll will still scrub frames */ })
+    }
+
+    // Subscribe to Lenis scroll events — native window scroll may not fire
+    // reliably on mobile touch when Lenis consumes the touch gesture.
+    const lenis = getLenis()
+    if (lenis) {
+      const onLenisScroll = () => {
+        updateProgress()
+        kick()
+      }
+      lenis.on('scroll', onLenisScroll)
+      lenisScrollOff = () => {
+        lenis.off('scroll', onLenisScroll)
+      }
+    }
     kick()
   })
 
@@ -154,6 +176,7 @@ export const useScrollVideo = (
     if (!options.externalProgress) {
       window.removeEventListener('scroll', onWindowScroll)
     }
+    lenisScrollOff?.()
     stopLoop()
     observer?.disconnect()
   })
