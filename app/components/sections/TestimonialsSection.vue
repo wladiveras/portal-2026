@@ -183,14 +183,19 @@ onUnmounted(() => {
             {{ landing.testimonials.headline.muted }}
           </p>
         </div>
-
       </div>
 
       <p v-if="store.loading && !list.length" class="py-6 text-center text-xs text-muted">
         {{ landing.testimonials.emptyState }}
       </p>
+    </div>
 
-      <template v-else-if="list.length">
+    <!-- Carrossel full-bleed: fora do max-w para não cortar as marquees na largura do ecrã -->
+    <template v-if="list.length">
+      <div
+        class="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 overflow-x-clip"
+        aria-label="Recomendações em carrossel"
+      >
         <div
           data-marquee-wrap
           class="mb-4 overflow-hidden py-6 opacity-100 will-change-[opacity,transform] md:mb-6 md:py-8"
@@ -224,7 +229,7 @@ onUnmounted(() => {
             </template>
           </div>
         </div>
-      </template>
-    </div>
+      </div>
+    </template>
   </section>
 </template>
