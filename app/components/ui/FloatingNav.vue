@@ -27,7 +27,6 @@ const navLinks = computed(() => landing.nav.items)
 
 const FAN_TARGETS = computed<OrbitPoint[]>(() => {
   const scale = orbitScale.value
-  // Layout vertical: botões de navegação em coluna, um abaixo do outro.
   const x = 0
   const yStart = Math.round(120 * scale)
   const yStep = Math.round(60 * scale)

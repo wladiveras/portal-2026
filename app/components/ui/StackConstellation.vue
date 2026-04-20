@@ -6,7 +6,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 const props = withDefaults(
   defineProps<{
     skills: string[]
-    /** Painel sem fundo opaco (ex.: vídeo atrás no mobile); em md+ volta o fundo suave. */
     overBackdrop?: boolean
   }>(),
   { overBackdrop: false }

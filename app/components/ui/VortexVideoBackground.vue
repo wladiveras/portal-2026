@@ -14,7 +14,6 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ meta: [duration: number] }>()
 
-/** ≥1 garante cobertura total (object-cover + translate); 0.76 gerava “letterbox” nas laterais. */
 const videoZoom = 1.14
 
 const videoRef = ref<HTMLVideoElement | null>(null)
@@ -39,8 +38,6 @@ onMounted(() => {
     { once: true }
   )
 
-  // "Wake" the video for mobile: play then immediately pause at 0.
-  // This enables currentTime seeking without letting frames advance on their own.
   if (!prefersReducedMotion.value) {
     const v = videoRef.value
     v.play().then(() => { v.currentTime = 0; v.pause() }).catch(() => {})

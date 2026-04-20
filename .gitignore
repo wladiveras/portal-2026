@@ -27,3 +27,6 @@ blob-report/
 .env
 .env.*
 !.env.example
+
+vault-portal-2026/
+vault-portal-2026/*

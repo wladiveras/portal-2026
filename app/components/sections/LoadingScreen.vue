@@ -16,7 +16,6 @@ const { prefersReducedMotion } = useReducedMotion()
 
 const videoSrc = landing.loading.videoSrc
 
-/** Splash um pouco mais longo para acompanhar leitura das palavras */
 const DURATION_S = 2.65
 const WORD_MS = 640
 const OUT_MS = 320
