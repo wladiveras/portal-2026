@@ -41,6 +41,17 @@ npm run test        # 8 files / 21 tests passed
 npm run build       # ok
 ```
 
+## Convenção fixada (Nuxt 4 auto-imports)
+
+Adicionei [`vault-portal-2026/Auto-imports e aliases (Nuxt 4).md`](../vault-portal-2026/Auto-imports%20e%20aliases%20%28Nuxt%204%29.md), atualizei [`.cursor/rules/dashboard.mdc`](../.cursor/rules/dashboard.mdc) e [`.planning/codebase/CONVENTIONS.md`](./codebase/CONVENTIONS.md). Resumo:
+
+- **Sem `import` de `vue` reactivity** (ref/computed/watch/etc).
+- **Sem `import X from '~/components/...'`** — usar tag PascalCase do path com deduplicação.
+- **Sem `import { useRole } from '~/composables/...'`** — auto.
+- **Server**: nunca importar helpers `h3` nem `server/utils/**` — Nitro auto-importa. Único import necessário em handlers Supabase é `serverSupabaseClient` de `'#supabase/server'`.
+- **Aliases**: `~/` = `app/`, `~~/` = root. **Proibido `..`**. Tipos de endpoints Nitro a partir de SFCs usam `~~/server/api/...`.
+- Renomeação `LeadDrawer/LeadStatusPicker/LeadTimeline` → `LeadsDrawer/LeadsStatusPicker/LeadsTimeline` para o auto-import gerar tags limpas (`<DashboardLeadsDrawer />`).
+
 ## Superfície entregue
 
 - `/login` + `/confirm` (auth RBAC).
