@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import type { AuditItem, DashboardAuditResponse } from '~/../server/api/dashboard/audit.get'
+import type { AuditItem, DashboardAuditResponse } from '~~/server/api/dashboard/audit.get'
 
 const { data, pending } = await useFetch<DashboardAuditResponse>('/api/dashboard/audit', {
   default: () => ({ items: [] as AuditItem[], next_cursor: null })

@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import BurndownChart from './BurndownChart.vue'
 import type { Database } from '~/types/database.types'
-import type { BurndownResponse } from '~/../server/api/dashboard/projects/[id]/burndown.get'
+import type { BurndownResponse } from '~~/server/api/dashboard/projects/[id]/burndown.get'
 
 type Task = Database['public']['Tables']['tasks']['Row']
 type Sprint = Database['public']['Tables']['sprints']['Row']

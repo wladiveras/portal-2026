@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import type { Database } from '~/types/database.types'
-import type { DashboardLeadsResponse } from '~/../server/api/dashboard/leads/index.get'
+import type { DashboardLeadsResponse } from '~~/server/api/dashboard/leads/index.get'
 
 type LeadStatus = Database['public']['Enums']['lead_status']
 

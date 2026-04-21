@@ -6,72 +6,106 @@ globs:
   - app/components/dashboard/**
   - app/composables/useRole.ts
   - app/composables/useLiveClock.ts
+  - app/composables/useTracker.ts
+  - app/composables/useSectionInView.ts
+  - app/composables/useLeadsQuery.ts
   - server/api/dashboard/**
+  - server/api/track/**
+  - server/utils/**
   - supabase/migrations/**
 alwaysApply: false
 ---
 
 # Dashboard rules — Portal 2026
 
-## Identidade visual (obrigatoria)
+## Auto-import e aliases (regra dura)
 
-- Usa tokens HSL de `app/assets/css/main.css` via Tailwind (`bg-bg`, `bg-surface`, `text-text-primary`, `text-muted`, `border-stroke`, `text-accent`). **Proibido hex inline** em componentes. Se precisares de cor nova, adiciona token em `main.css` primeiro.
-- Titulos de seccao e cards de destaque: `font-display italic` (Instrument Serif) + `text-text-primary/88`.
-- Corpo e labels: `font-sans` (Inter).
-- Superficies elevadas: classe utilitaria `.glass-surface` (ja definida).
-- Destaques acentuados: `.accent-gradient` com `bg-clip-text text-transparent` quando texto; ou fill normal quando icon/button.
-- Dark mode e opt-in via `<html data-theme="dark">` (controlado por `TopBar`). Nao mexer no `:root` ao adicionar novos tokens — usar o bloco `[data-theme='dark']`.
-- Sem video/autoplay na dashboard. Motion respeita `prefers-reduced-motion` sempre.
+Nuxt 4 auto-importa por convencao. Nao usar `import` manual quando o auto-import existe.
+
+### Vue (auto)
+- `ref`, `reactive`, `computed`, `watch`, `watchEffect`, `nextTick`, `onMounted`, `onBeforeUnmount`, `onUnmounted`, `defineComponent`, etc. **NUNCA** importar de `'vue'`. Apenas `defineProps`/`defineEmits`/`defineModel`/`defineSlots` sao macros (sem import).
+
+### Componentes (auto)
+- Tudo em `app/components/**` vira tag por path + filename, com **deduplicacao de segmentos iguais**:
+  - `app/components/dashboard/SidebarNav.vue` -> `<DashboardSidebarNav />`
+  - `app/components/dashboard/leads/LeadsTable.vue` -> `<DashboardLeadsTable />` (Leads dedupada)
+  - `app/components/dashboard/charts/SourceDonut.vue` -> `<DashboardChartsSourceDonut />`
+- **NUNCA** `import X from '~/components/...'`. Use a tag.
+- Renomeie o ficheiro para casar com o nome do diretorio quando quiser nome curto (ex.: `LeadsDrawer.vue` em `leads/` para `<DashboardLeadsDrawer />` em vez de `<DashboardLeadsLeadDrawer />`).
+- Para dynamic component, use `import { Foo } from '#components'`.
+
+### Composables / utils (auto)
+- Qualquer `useXxx` em `app/composables/**` e funcao em `app/utils/**` ja e auto-imported em qualquer ficheiro `app/`.
+- **NUNCA** `import { useRole } from '~/composables/useRole'`.
+
+### Helpers Nuxt (auto)
+- `useFetch`, `useAsyncData`, `useRoute`, `useRouter`, `useState`, `useCookie`, `useRuntimeConfig`, `definePageMeta`, `defineNuxtPlugin`, `defineNuxtRouteMiddleware`, `navigateTo`, `createError`, `useSupabaseUser`, `useSupabaseClient` (do modulo `@nuxtjs/supabase`).
+
+### Server (Nitro auto)
+- `defineEventHandler`, `getQuery`, `getRouterParam`, `readBody`, `createError`, `setResponseStatus`, `getRequestHeader`, `useRuntimeConfig` -- nunca importar.
+- Tudo em `server/utils/**/*.ts` e auto-imported em qualquer `server/api/**/*.ts`. Ex.: `serverSupabaseServiceRole(event)` e `requireAdmin(event)` sem import.
+- `serverSupabaseClient` vem de `'#supabase/server'` (alias do modulo). Esse e o **unico** import necessario nos handlers Supabase.
+
+### Path aliases (Nuxt 4)
+- `~/` ou `@/` -> `app/` (srcDir).
+- `~~/` ou `@@/` -> raiz do projeto (rootDir).
+- **PROIBIDO** usar `..` para sair do diretorio. Sempre usar alias.
+- Para tipos de endpoints Nitro em SFCs/composables: `import type { Foo } from '~~/server/api/dashboard/.../foo.get'`.
+
+### Quando importar manualmente (excecoes)
+- Bibliotecas npm: `import { Icon } from '@iconify/vue'`, `import gsap from 'gsap'`, `import Sortable from 'sortablejs'`.
+- Componentes do Unovis: `import { VisXYContainer, VisArea } from '@unovis/vue'` (nao auto).
+- Tipos do TypeScript: `import type { Database } from '~/types/database.types'`.
+
+## Identidade visual (obrigatoria)
+- Tokens HSL via Tailwind (`bg-bg`, `bg-surface`, `text-text-primary`, `text-muted`, `border-stroke`, `text-accent`). **Proibido hex inline** em componentes; adiciona token novo em `app/assets/css/main.css` antes.
+- Titulos de seccao: `font-display italic` (Instrument Serif) com `text-text-primary` ou `/88`.
+- Corpo: `font-sans` (Inter).
+- Superficies elevadas: `.glass-surface`.
+- Destaques: `.accent-gradient` com `bg-clip-text text-transparent`.
+- Dark mode: `<html data-theme="dark">`. Nao mexer em `:root` -- estender `[data-theme='dark']`.
+- Sem video/autoplay na dashboard.
 
 ## Arquitectura
+- Paginas em `app/pages/dashboard/**` declaram `definePageMeta({ layout: 'dashboard' })` + `middleware: ['role']` + `role: 'admin' | UserRole[]`.
+- Auth global em `app/middleware/auth.global.ts` so intercepta `/dashboard/**`.
+- Authorization em `useRole().can(action)` e `isAdmin/isEditor`.
+- Tipos em `app/types/auth.ts` e `app/types/database.types.ts` (regen via Supabase MCP).
 
-- Paginas sob `app/pages/dashboard/**` **sempre** declaram `definePageMeta({ layout: 'dashboard' })`.
-- Paginas sensiveis adicionam `middleware: ['role']` + `role: 'admin'` (ou array).
-- Auth guard global (`app/middleware/auth.global.ts`) so intercepta `/dashboard/**` — nao adicionar excepcoes lá; extender via `role`.
-- Composables partilhados:
-  - `useRole()` para checagens de autorizacao (`isAdmin`, `can('edit_leads')`).
-  - `useSupabaseClient<Database>()` para leituras client-side.
-  - `useSupabaseUser()` para reactividade do user.
-- Tipos em `app/types/auth.ts` e `app/types/database.types.ts`; manter sincronizados com migrations.
-
-## Regra de ouro — service role
-
-- `SUPABASE_SERVICE_KEY` **so** via `runtimeConfig.supabaseServiceKey` em `server/**`.
-- Qualquer `INSERT/UPDATE/DELETE` com risco (leads, invites, tasks de outros users, audit log) vai por `server/api/dashboard/**` usando `serverSupabaseServiceRole`.
-- Clientes no browser usam a anon key e **dependem de RLS**.
+## Regra de ouro -- service role
+- `NUXT_SUPABASE_SECRET_KEY` (legacy `SUPABASE_SERVICE_KEY`) so existe no server.
+- INSERT/UPDATE/DELETE de risco sempre via handler Nitro com `serverSupabaseServiceRole(event)`.
+- Clients usam anon key + dependem de RLS.
+- Endpoints admin usam `requireAdmin(event)` no inicio para devolver 401/403 antes da logica.
 
 ## Supabase / RLS
-
-- Migrations numeradas em `supabase/migrations/` (`0001_auth.sql`, `0002_tracking.sql`, ...).
-- **Deny-all por default**: toda tabela nova `ENABLE ROW LEVEL SECURITY` e depois policies explicitas.
-- Verifica policies para cada combinacao `{admin, editor, viewer}` antes de expor endpoint.
-- Nunca alterar `profiles.role` via client; so por admin com policy especifica.
+- Migrations numeradas (`0001_auth.sql`, `0002_tracking.sql`, ...).
+- Sempre `ENABLE ROW LEVEL SECURITY` + policies explicitas por role.
+- Verifica policies para `{admin, editor, viewer}` antes de expor endpoint.
+- `is_editor_or_admin()` e `can_access_project(uuid)` ja existem como helpers; reusa.
 
 ## Layout
+- Grid principal `grid-cols-12 gap-4`. Mobile stack.
+- Sidebar fixa 240px em md+.
+- TopBar com toggle de tema e pill de user.
 
-- Grid da home: 12 colunas (`grid-cols-12 gap-4`). Breakpoint mobile: stack.
-- Sidebar fixa 240px em md+; mobile vira `Drawer` (fase futura).
-- `TopBar` sempre com toggle de tema e pill de user.
-
-## Bibliotecas permitidas para dashboard
-
-- Charts: `@unovis/vue` (leve, SSR-safe). **Nao introduzir** chart.js/echarts sem plano que justifique.
-- Drag-and-drop: `sortablejs` ou `@vueuse/integrations/useSortable`.
-- Icons: `@iconify/vue` com conjunto `lucide:*` (ja usado no landing).
+## Bibliotecas permitidas
+- Charts: `@unovis/vue` (leve, SSR-safe). **Nao introduzir** chart.js/echarts sem plano.
+- Drag-and-drop: `sortablejs`.
+- Icons: `@iconify/vue` com conjunto `lucide:*`.
 
 ## Testes
-
-- Cada composable novo → Vitest unit.
-- Cada pagina critica (`/dashboard/leads`, `/dashboard/projects/[id]`, `/dashboard/access`) → 1 E2E minimo.
-- Evitar E2E que dependa de Supabase real: usa `page.route('**/api/dashboard/**', ...)` para mockar.
-- Atualizar `.planning/codebase/TESTING.md` quando adicionar nova suite.
+- Cada composable novo -> Vitest unit.
+- Cada pagina critica -> 1 E2E minimo.
+- Mock `**/api/dashboard/**` em E2E para nao depender de Supabase real.
+- Atualizar `.planning/codebase/TESTING.md` quando adicionar suite.
 
 ## Checklist antes de commitar
-
-- [ ] `npm run typecheck` verde.
+- [ ] `npm run typecheck` verde (nuxt typecheck local, sem npx).
 - [ ] `npm run test` verde.
-- [ ] Se alterou landing: `npm run test:e2e` na suite `e2e/landing.spec.ts`.
+- [ ] Sem `import` redundante (vue, componentes locais, server utils).
+- [ ] Sem path com `..` -- so aliases `~/` ou `~~/`.
 - [ ] Sem hex inline ou cor fora dos tokens.
 - [ ] Sem service key no bundle cliente.
 - [ ] RLS testada para os tres roles.
-- [ ] `.planning/STATE.md` atualizado se fechaste uma fase.
+- [ ] `.planning/STATE.md` atualizado se fechaste fase.

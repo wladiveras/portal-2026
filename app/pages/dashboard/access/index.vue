@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import AuditLogTable from '~/components/dashboard/access/AuditLogTable.vue'
-import InviteUserForm from '~/components/dashboard/access/InviteUserForm.vue'
-import ProfilesTable from '~/components/dashboard/access/ProfilesTable.vue'
-import type { ProfileListItem } from '~/../server/api/dashboard/profiles/index.get'
+import type { ProfileListItem } from '~~/server/api/dashboard/profiles/index.get'
 import type { Database } from '~/types/database.types'
 
 type Invite = Database['public']['Tables']['invites']['Row']
@@ -41,7 +38,7 @@ async function revokeInvite(token: string) {
 <template>
   <NuxtLayout name="dashboard" eyebrow="Acessos" title="Quem pode entrar">
     <div class="space-y-6">
-      <InviteUserForm @invited="() => refreshInvites()" />
+      <DashboardAccessInviteUserForm @invited="() => refreshInvites()" />
 
       <section
         v-if="invites && invites.length"
@@ -71,14 +68,14 @@ async function revokeInvite(token: string) {
         </ul>
       </section>
 
-      <ProfilesTable
+      <DashboardAccessProfilesTable
         :items="profiles ?? []"
         :current-user-id="user?.id ?? null"
         :loading="pending"
         @updated="(p) => { onProfileUpdated(p); refresh() }"
       />
 
-      <AuditLogTable />
+      <DashboardAccessAuditLogTable />
     </div>
   </NuxtLayout>
 </template>

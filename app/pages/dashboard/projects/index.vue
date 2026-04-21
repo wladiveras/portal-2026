@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import type { ProjectSummary } from '~/../server/api/dashboard/projects/index.get'
+import type { ProjectSummary } from '~~/server/api/dashboard/projects/index.get'
 
 definePageMeta({
   layout: 'dashboard',

@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { Icon } from '@iconify/vue'
-import KanbanBoard from '~/components/dashboard/projects/KanbanBoard.vue'
-import TaskDrawer from '~/components/dashboard/projects/TaskDrawer.vue'
 import type { Database } from '~/types/database.types'
-import type { ProjectDetailResponse } from '~/../server/api/dashboard/projects/[id]/index.get'
+import type { ProjectDetailResponse } from '~~/server/api/dashboard/projects/[id]/index.get'
 
 type Task = Database['public']['Tables']['tasks']['Row']
 
@@ -96,7 +93,7 @@ function onTaskUpdated(updated: Task) {
         </nav>
       </header>
 
-      <KanbanBoard
+      <DashboardProjectsKanbanBoard
         v-if="tab === 'kanban'"
         :tasks="tasks"
         :can-edit="can('manage_projects')"
@@ -130,7 +127,7 @@ function onTaskUpdated(updated: Task) {
         </ul>
       </section>
 
-      <TaskDrawer
+      <DashboardProjectsTaskDrawer
         :task="selected"
         :can-edit="can('manage_projects')"
         @close="selectedId = null"

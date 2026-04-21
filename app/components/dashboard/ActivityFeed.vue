@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
-import type { DashboardActivityResponse } from '~/../server/api/dashboard/activity.get'
+import type { DashboardActivityResponse } from '~~/server/api/dashboard/activity.get'
 
 const { data, pending } = await useFetch<DashboardActivityResponse>('/api/dashboard/activity', {
   default: () => ({ items: [], next_cursor: null })

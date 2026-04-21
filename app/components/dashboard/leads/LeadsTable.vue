@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import type { Database } from '~/types/database.types'
-import type { LeadListItem } from '~/../server/api/dashboard/leads/index.get'
+import type { LeadListItem } from '~~/server/api/dashboard/leads/index.get'
 
 type LeadStatus = Database['public']['Enums']['lead_status']
 

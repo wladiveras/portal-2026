@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { downloadCsv, toCsv } from '~/utils/csv'
-import type { LeadListItem, DashboardLeadsResponse } from '~/../server/api/dashboard/leads/index.get'
+import type { LeadListItem, DashboardLeadsResponse } from '~~/server/api/dashboard/leads/index.get'
 
 interface Props {
   /** Current query string (filters + pagination) to replay server-side. */

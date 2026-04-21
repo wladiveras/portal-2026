@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import type { Database } from '~/types/database.types'
-import type { ProfileListItem } from '~/../server/api/dashboard/profiles/index.get'
+import type { ProfileListItem } from '~~/server/api/dashboard/profiles/index.get'
 
 type UserRole = Database['public']['Enums']['user_role']
 

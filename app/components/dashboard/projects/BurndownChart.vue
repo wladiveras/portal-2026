@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { VisAxis, VisLine, VisXYContainer } from '@unovis/vue'
-import type { BurndownPoint } from '~/../server/api/dashboard/projects/[id]/burndown.get'
+import type { BurndownPoint } from '~~/server/api/dashboard/projects/[id]/burndown.get'
 
 interface Props {
   series: BurndownPoint[]

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import StatCard from './StatCard.vue'
-import type { DashboardStatsResponse } from '~/../server/api/dashboard/stats.get'
+import type { DashboardStatsResponse } from '~~/server/api/dashboard/stats.get'
 
 const FALLBACK: DashboardStatsResponse = {
   range: '7d',

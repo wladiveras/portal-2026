@@ -4,9 +4,19 @@ Coding style and recurring patterns in **portal-2026**.
 
 ## TypeScript & Vue
 
-- **`<script setup lang="ts">`** in SFCs; `ref` / `computed` / lifecycle used explicitly where needed (`app/pages/index.vue` uses `ref` for loading gate).
-- **Auto-imports**: Nuxt provides `defineNuxtPlugin`, `usePortfolioStore`, composables from `composables/` without manual imports in many files (verify per-file if a symbol is unresolved).
-- **Types**: Shared domain types live in `app/types/portfolio.ts`; avoid duplicating API shapes in components.
+- **`<script setup lang="ts">`** in SFCs.
+- **Auto-imports são a forma canónica**:
+  - Nunca importar `ref/computed/watch/onMounted/...` de `'vue'`. Nuxt auto-importa.
+  - Nunca importar componentes locais (`~/components/**`) — usar a tag auto-importada gerada pelo path + filename com **deduplicação de segmentos** (`app/components/dashboard/leads/LeadsTable.vue` → `<DashboardLeadsTable />`).
+  - Nunca importar composables/utils próprios (`~/composables/**`, `~/utils/**`) — auto.
+  - Nunca importar helpers Nitro (`defineEventHandler`, `readBody`, `getQuery`, `createError`, `setResponseStatus`, `getRouterParam`, `getRequestHeader`, `useRuntimeConfig`).
+  - Nunca importar funções de `server/utils/**/*.ts` em handlers — Nitro auto-importa (ex.: `serverSupabaseServiceRole(event)`, `requireAdmin(event)`).
+- **Path aliases** (Nuxt 4 com `srcDir: 'app'`):
+  - `~/` e `@/` → `app/` (UI/composables/utils/types client).
+  - `~~/` e `@@/` → root do projeto (use para `~~/server/api/...` quando precisar tipos de endpoints).
+  - **Proibido `..`** para sair de diretório.
+- **Imports manuais legítimos**: bibliotecas npm (`@iconify/vue`, `gsap`, `sortablejs`, `@unovis/vue`), o alias `#supabase/server` do `@nuxtjs/supabase`, e `import type` de TS.
+- **Types**: domínios compartilhados em `app/types/auth.ts`, `app/types/database.types.ts` (regenerado via Supabase MCP), `app/types/portfolio.ts`.
 
 ## Styling
 
