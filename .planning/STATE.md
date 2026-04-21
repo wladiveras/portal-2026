@@ -2,22 +2,63 @@
 
 ## Milestone atual
 
-Single-repo **portal-2026** (Nuxt 4 landing portfolio).
+**Admin Dashboard v1** — **CONCLUÍDO**. Todas as fases 04-09 entregues.
 
-## Fase em curso
+## Fases concluídas
 
-- **03 — Automated testing:** implementação e CI concluídos no branch local; aguarda **push** e validação do workflow no GitHub + **TEST-06** manual (vídeo/motion).
+- **04 — Foundation & Auth**
+- **05 — Tracking infra**
+- **06 — Dashboard Home**
+- **07 — Leads management**
+- **08 — Projects Agile**
+- **09 — Access management**
 
-## Última entrega relevante
+## Supabase — estado remoto
 
-- Commit: `test: add Vitest, Playwright, and CI for phase 03` (Vitest, Playwright, `.github/workflows/ci.yml`, testes unit/E2E).
+- Projeto: `wladi-portal` (`oqslwfxugwvaqsfbemzi`).
+- Migrations aplicadas via MCP:
+  - `0001_auth` + `0001a_auth_search_path`
+  - `0002_tracking`
+  - `0003_notes`
+  - `0004_lead_notes`
+  - `0005_projects`
+  - `0006_audit_log`
+- Tipos TS em [`app/types/database.types.ts`](../app/types/database.types.ts).
+- Security advisors: 0 lints em todas as fases.
 
-## Próximos passos sugeridos
+## Libs novas neste milestone
 
-1. `git push` e confirmar job **CI** verde no GitHub.
-2. **TEST-06:** checklist manual em `03-PHASE-SUMMARY.md` / `.planning/codebase/TESTING.md`.
-3. Definir **fase 04** no `ROADMAP.md` (ex.: performance, CMS para portfolio, a11y audit) ou `$gsd-new-milestone` se o escopo mudar.
+- `@nuxtjs/supabase` · auth + SSR helpers
+- `@unovis/ts`, `@unovis/vue` · charts
+- `sortablejs` + `@types/sortablejs` · kanban DnD
+- `vue-tsc` + `@vue/language-core` · typecheck self-contained
 
-## Todos / riscos
+## Verificação final
 
-- Assets de vídeo em `public/media/` podem estar removidos no working tree; E2E usa `reducedMotion` mas `waitForVideoCanPlay` ainda referencia URLs — validar em ambiente limpo.
+```
+npm run typecheck   # exit 0
+npm run test        # 8 files / 21 tests passed
+npm run build       # ok
+```
+
+## Superfície entregue
+
+- `/login` + `/confirm` (auth RBAC).
+- `/dashboard` com welcome, clock, notas, 4 KPIs, 3 charts, activity feed.
+- `/dashboard/leads` (filtros, drawer com timeline/notas/status, export CSV, delete admin).
+- `/dashboard/projects` + `/dashboard/projects/[id]` (kanban, sprint com burndown, backlog).
+- `/dashboard/access` (admin): profiles + convites + audit_log.
+- Landing (`/`) com tracking first-party para leads/whatsapp/email/social + page_view.
+
+## Próximos candidatos (post v1)
+
+1. UI CRUD para projetos/sprints (atualmente criados via SQL).
+2. Avatar upload em profiles.
+3. E2E autenticado com seeds de Supabase (supabase CLI).
+4. Observability: trocar audit stubs nos endpoints de leads pelo `log_audit()` real (a função existe).
+5. Dark mode preference sincronizada com `prefers-color-scheme` (hoje só localStorage).
+
+## Pendências manuais
+
+- Primeiro `signInWithOtp` ainda precisa ser feito; trigger `handle_new_user` promove o primeiro user a admin.
+- Criar projetos/sprints manualmente para ver `/dashboard/projects/[id]` com dados reais.

@@ -1,0 +1,77 @@
+---
+description: Convencoes para codigo da admin dashboard (/dashboard/**)
+globs:
+  - app/pages/dashboard/**
+  - app/layouts/dashboard.vue
+  - app/components/dashboard/**
+  - app/composables/useRole.ts
+  - app/composables/useLiveClock.ts
+  - server/api/dashboard/**
+  - supabase/migrations/**
+alwaysApply: false
+---
+
+# Dashboard rules — Portal 2026
+
+## Identidade visual (obrigatoria)
+
+- Usa tokens HSL de `app/assets/css/main.css` via Tailwind (`bg-bg`, `bg-surface`, `text-text-primary`, `text-muted`, `border-stroke`, `text-accent`). **Proibido hex inline** em componentes. Se precisares de cor nova, adiciona token em `main.css` primeiro.
+- Titulos de seccao e cards de destaque: `font-display italic` (Instrument Serif) + `text-text-primary/88`.
+- Corpo e labels: `font-sans` (Inter).
+- Superficies elevadas: classe utilitaria `.glass-surface` (ja definida).
+- Destaques acentuados: `.accent-gradient` com `bg-clip-text text-transparent` quando texto; ou fill normal quando icon/button.
+- Dark mode e opt-in via `<html data-theme="dark">` (controlado por `TopBar`). Nao mexer no `:root` ao adicionar novos tokens — usar o bloco `[data-theme='dark']`.
+- Sem video/autoplay na dashboard. Motion respeita `prefers-reduced-motion` sempre.
+
+## Arquitectura
+
+- Paginas sob `app/pages/dashboard/**` **sempre** declaram `definePageMeta({ layout: 'dashboard' })`.
+- Paginas sensiveis adicionam `middleware: ['role']` + `role: 'admin'` (ou array).
+- Auth guard global (`app/middleware/auth.global.ts`) so intercepta `/dashboard/**` — nao adicionar excepcoes lá; extender via `role`.
+- Composables partilhados:
+  - `useRole()` para checagens de autorizacao (`isAdmin`, `can('edit_leads')`).
+  - `useSupabaseClient<Database>()` para leituras client-side.
+  - `useSupabaseUser()` para reactividade do user.
+- Tipos em `app/types/auth.ts` e `app/types/database.types.ts`; manter sincronizados com migrations.
+
+## Regra de ouro — service role
+
+- `SUPABASE_SERVICE_KEY` **so** via `runtimeConfig.supabaseServiceKey` em `server/**`.
+- Qualquer `INSERT/UPDATE/DELETE` com risco (leads, invites, tasks de outros users, audit log) vai por `server/api/dashboard/**` usando `serverSupabaseServiceRole`.
+- Clientes no browser usam a anon key e **dependem de RLS**.
+
+## Supabase / RLS
+
+- Migrations numeradas em `supabase/migrations/` (`0001_auth.sql`, `0002_tracking.sql`, ...).
+- **Deny-all por default**: toda tabela nova `ENABLE ROW LEVEL SECURITY` e depois policies explicitas.
+- Verifica policies para cada combinacao `{admin, editor, viewer}` antes de expor endpoint.
+- Nunca alterar `profiles.role` via client; so por admin com policy especifica.
+
+## Layout
+
+- Grid da home: 12 colunas (`grid-cols-12 gap-4`). Breakpoint mobile: stack.
+- Sidebar fixa 240px em md+; mobile vira `Drawer` (fase futura).
+- `TopBar` sempre com toggle de tema e pill de user.
+
+## Bibliotecas permitidas para dashboard
+
+- Charts: `@unovis/vue` (leve, SSR-safe). **Nao introduzir** chart.js/echarts sem plano que justifique.
+- Drag-and-drop: `sortablejs` ou `@vueuse/integrations/useSortable`.
+- Icons: `@iconify/vue` com conjunto `lucide:*` (ja usado no landing).
+
+## Testes
+
+- Cada composable novo → Vitest unit.
+- Cada pagina critica (`/dashboard/leads`, `/dashboard/projects/[id]`, `/dashboard/access`) → 1 E2E minimo.
+- Evitar E2E que dependa de Supabase real: usa `page.route('**/api/dashboard/**', ...)` para mockar.
+- Atualizar `.planning/codebase/TESTING.md` quando adicionar nova suite.
+
+## Checklist antes de commitar
+
+- [ ] `npm run typecheck` verde.
+- [ ] `npm run test` verde.
+- [ ] Se alterou landing: `npm run test:e2e` na suite `e2e/landing.spec.ts`.
+- [ ] Sem hex inline ou cor fora dos tokens.
+- [ ] Sem service key no bundle cliente.
+- [ ] RLS testada para os tres roles.
+- [ ] `.planning/STATE.md` atualizado se fechaste uma fase.

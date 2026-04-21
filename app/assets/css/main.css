@@ -12,6 +12,19 @@
   --stroke: 214 32% 91%;
 }
 
+/**
+ * Dark tokens for the dashboard only — opted-in via `<html data-theme="dark">`
+ * (set by app/components/dashboard/TopBar.vue). The landing (`/`) never sets
+ * `data-theme`, so it keeps its light identity untouched.
+ */
+[data-theme='dark'] {
+  --bg: 222 27% 7%;
+  --surface: 222 22% 11%;
+  --text: 210 20% 96%;
+  --muted: 215 14% 65%;
+  --stroke: 222 18% 18%;
+}
+
 * {
   box-sizing: border-box;
 }

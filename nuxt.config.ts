@@ -2,8 +2,27 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss', '@nuxtjs/supabase'],
   css: ['~/assets/css/main.css'],
+  runtimeConfig: {
+    /**
+     * Supabase service role / secret key — server only. We accept both the
+     * legacy `SUPABASE_SERVICE_KEY` and the new `NUXT_SUPABASE_SECRET_KEY`
+     * (Nuxt Supabase migrated to the latter; see https://supabase.com/blog/jwt-signing-keys).
+     */
+    supabaseServiceKey:
+      process.env.SUPABASE_SERVICE_KEY ??
+      process.env.NUXT_SUPABASE_SECRET_KEY ??
+      ''
+  },
+  supabase: {
+    redirectOptions: {
+      login: '/login',
+      callback: '/confirm',
+      include: ['/dashboard/**'],
+      exclude: ['/']
+    }
+  },
   nitro: {
     publicAssets: [
       {

@@ -5,12 +5,49 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { landing } from '~/data/landing'
 import { useCinematicLoopVideo } from '~/composables/useCinematicLoopVideo'
+import { useTracker } from '~/composables/useTracker'
+import { useSectionInView } from '~/composables/useSectionInView'
+import { parseUtmFromSearch } from '~/utils/utm'
+
+const { trackEvent, trackLead } = useTracker()
+
+function currentUtm() {
+  if (typeof window === 'undefined') return undefined
+  return parseUtmFromSearch(window.location.search)
+}
+
+function handleWhatsappClick() {
+  void trackLead({
+    source: 'whatsapp',
+    contactValue: landing.contact.whatsappHref,
+    utm: currentUtm()
+  })
+}
+
+function handleEmailClick() {
+  void trackLead({
+    source: 'email',
+    contactValue: landing.contact.email,
+    utm: currentUtm()
+  })
+}
+
+function handleSocialClick(label: string, href: string) {
+  void trackEvent({
+    type: 'click_social',
+    target: href,
+    meta: { label }
+  })
+}
 
 const videoRef = ref<HTMLVideoElement | null>(null)
 const { opacity } = useCinematicLoopVideo(videoRef, { fadeSec: 0.5, restartDelayMs: 100 })
 
 const marquee = ref<HTMLElement | null>(null)
 const ctaBlock = ref<HTMLElement | null>(null)
+const rootSection = ref<HTMLElement | null>(null)
+
+useSectionInView(rootSection, 'contact')
 const phrase = computed(() => `${landing.contact.marqueePhrase} · `.repeat(8))
 
 let ctaTween: gsap.core.Tween | null = null
@@ -51,6 +88,7 @@ onUnmounted(() => {
 <template>
   <section
     :id="landing.contact.sectionId"
+    ref="rootSection"
     class="relative scroll-mt-24 min-h-[95vh] w-full overflow-hidden bg-bg pb-20 pt-16 md:min-h-[100vh] md:pb-28 md:pt-20"
   >
     <div class="absolute inset-0 z-0 overflow-hidden">
@@ -112,12 +150,14 @@ onUnmounted(() => {
               target="_blank"
               rel="noreferrer"
               class="inline-flex rounded-full bg-text-primary px-8 py-4 text-base text-white shadow-lg transition-transform duration-300 hover:scale-[1.03] md:px-10 md:py-4"
+              @click="handleWhatsappClick"
             >
               {{ landing.contact.ctaButtonLabel }}
             </a>
             <a
               :href="`mailto:${landing.contact.email}`"
               class="inline-flex rounded-full border border-stroke/80 bg-white px-8 py-4 text-base text-text-primary shadow-sm transition-transform duration-300 hover:scale-[1.03] md:px-10 md:py-4"
+              @click="handleEmailClick"
             >
               {{ landing.contact.ctaButtonEmailLabel }}
             </a>
@@ -137,6 +177,7 @@ onUnmounted(() => {
             target="_blank"
             rel="noreferrer"
             class="inline-flex items-center gap-2 rounded-full border border-stroke/70 bg-white/55 px-4 py-2.5 text-muted shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-[#89aacc]/45 hover:text-text-primary hover:shadow-md"
+            @click="handleSocialClick(s.label, s.href)"
           >
             <Icon :icon="s.icon" class="h-4 w-4 shrink-0 text-text-primary/90" />
             {{ s.label }}

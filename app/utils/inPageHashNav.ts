@@ -1,5 +1,24 @@
 import { getLenis } from '~/utils/lenis'
 
+function fireHashTrack(targetId: string) {
+  if (typeof window === 'undefined') return
+  try {
+    const { useTracker } = (globalThis as unknown as {
+      __wvTracker?: typeof import('~/composables/useTracker')
+    }).__wvTracker ?? {}
+    if (useTracker) {
+      useTracker().trackEvent({ type: 'hash_nav', target: targetId })
+      return
+    }
+  } catch {
+    // noop
+  }
+  // Fallback: direct dynamic import so both client and test envs work.
+  void import('~/composables/useTracker')
+    .then((m) => m.useTracker().trackEvent({ type: 'hash_nav', target: targetId }))
+    .catch(() => {})
+}
+
 /**
  * Scroll suave para IDs na mesma página (âncoras #). Ajuda no SPA onde o
  * comportamento nativo de hash nem sempre alinha bem com o layout.
@@ -32,6 +51,7 @@ export function navigateToHash(
   if (options?.updateHistory !== false && history.replaceState) {
     history.replaceState(null, '', href)
   }
+  fireHashTrack(id)
   return true
 }
 
