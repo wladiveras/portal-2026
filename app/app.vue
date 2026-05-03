@@ -3,7 +3,9 @@
 <template>
   <div class="app-root bg-bg text-text-primary">
     <NuxtRouteAnnouncer />
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>
 

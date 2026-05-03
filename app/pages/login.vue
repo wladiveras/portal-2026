@@ -7,7 +7,8 @@ const client = useSupabaseClient()
 const user = useSupabaseUser()
 const route = useRoute()
 
-const mode = ref<'magic' | 'password'>('magic')
+const initialMode = route.query.mode === 'password' ? 'password' : 'magic'
+const mode = ref<'magic' | 'password'>(initialMode)
 const email = ref('')
 const password = ref('')
 const submitting = ref(false)

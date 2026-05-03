@@ -4,7 +4,7 @@
  */
 import { createEvent } from 'h3'
 import { describe, expect, it } from 'vitest'
-import handler from '../../../server/api/portfolio.get'
+import handler from '~~/server/api/portfolio.get'
 
 describe('server/api/portfolio.get', () => {
   it('returns JSON with PortfolioData keys', async () => {

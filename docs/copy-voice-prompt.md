@@ -51,5 +51,6 @@ Refatore o texto abaixo seguindo todas essas diretrizes, melhorando clareza, rit
 
 ## Onde vive a copy no repo
 
+- Mapa resumido: `docs/copy-sources.md`
 - Estática: `app/data/landing.ts`
-- Sobre / tagline do hero (API): `server/api/portfolio.get.ts` → `about.summary`, `about.longText`
+- Sobre / tagline do hero (API): `server/application/dashboard/portfolio/queries.ts` (`qryPortfolioPayload`) → `about.summary`, `about.longText` — exposto via `GET /api/portfolio` (`server/api/portfolio.get.ts`)

@@ -1,4 +1,5 @@
 import type { Json } from '~/types/database.types'
+import { qryDashboardActivity } from '~~/server/application/dashboard/leads/queries'
 
 export interface ActivityItem {
   id: string
@@ -22,28 +23,9 @@ export default defineEventHandler(async (event): Promise<DashboardActivityRespon
   const limit = Math.min(MAX_LIMIT, Number(query.limit) || DEFAULT_LIMIT)
   const cursor = typeof query.cursor === 'string' ? query.cursor : null
 
-  const client = serverSupabaseServiceRole(event)
-  let q = client
-    .from('lead_events')
-    .select('id, type, target, path, meta, created_at')
-    .order('created_at', { ascending: false })
-    .limit(limit)
-
-  if (cursor) q = q.lt('created_at', cursor)
-
-  const { data, error } = await q
-  if (error) throw createError({ statusCode: 500, statusMessage: error.message })
-
-  const items: ActivityItem[] = (data ?? []).map((row) => ({
-    id: String(row.id),
-    type: row.type,
-    target: row.target,
-    path: row.path,
-    meta: row.meta,
-    created_at: row.created_at
-  }))
-
-  const next_cursor = items.length === limit ? items[items.length - 1]?.created_at ?? null : null
-
-  return { items, next_cursor }
+  const data = await qryDashboardActivity(event, { limit, cursor })
+  return {
+    items: data.items as ActivityItem[],
+    next_cursor: data.next_cursor
+  }
 })

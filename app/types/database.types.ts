@@ -168,6 +168,7 @@ export type Database = {
           id: string
           last_seen: string
           notes: string | null
+          project_id: string | null
           source: string | null
           status: Database['public']['Enums']['lead_status']
           utm_campaign: string | null
@@ -183,6 +184,7 @@ export type Database = {
           id?: string
           last_seen?: string
           notes?: string | null
+          project_id?: string | null
           source?: string | null
           status?: Database['public']['Enums']['lead_status']
           utm_campaign?: string | null
@@ -198,6 +200,7 @@ export type Database = {
           id?: string
           last_seen?: string
           notes?: string | null
+          project_id?: string | null
           source?: string | null
           status?: Database['public']['Enums']['lead_status']
           utm_campaign?: string | null
@@ -211,6 +214,13 @@ export type Database = {
             columns: ['visitor_id']
             isOneToOne: false
             referencedRelation: 'visitors'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leads_project_id_fkey'
+            columns: ['project_id']
+            isOneToOne: false
+            referencedRelation: 'projects'
             referencedColumns: ['id']
           }
         ]
@@ -304,6 +314,30 @@ export type Database = {
         }
         Relationships: []
       }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           archived: boolean
@@ -312,6 +346,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          organization_id: string
           owner_id: string | null
           slug: string
           updated_at: string
@@ -323,6 +358,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          organization_id: string
           owner_id?: string | null
           slug: string
           updated_at?: string
@@ -334,11 +370,61 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          organization_id?: string
           owner_id?: string | null
           slug?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'projects_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      project_landing: {
+        Row: {
+          created_at: string
+          draft_json: Json
+          project_id: string
+          published_at: string | null
+          published_json: Json | null
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          draft_json?: Json
+          project_id: string
+          published_at?: string | null
+          published_json?: Json | null
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          draft_json?: Json
+          project_id?: string
+          published_at?: string | null
+          published_json?: Json | null
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'project_landing_project_id_fkey'
+            columns: ['project_id']
+            isOneToOne: true
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          }
+        ]
       }
       project_members: {
         Row: {

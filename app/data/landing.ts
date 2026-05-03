@@ -1,6 +1,6 @@
 /**
  * Textos e rótulos da landing. Dados dinâmicos (projetos, depoimentos, CV) vêm de `/api/portfolio` → Pinia.
- * Tom editorial: ver `docs/copy-voice-prompt.md`. PT-BR direto; roles do hero em inglês (contexto tech).
+ * Tom editorial: `docs/copy-voice-prompt.md`. Mapa landing vs API: `docs/copy-sources.md`. PT-BR direto; roles do hero em inglês (contexto tech).
  */
 const DIAMOND_LOOP_VIDEO = '/media/Diamante_Girant.mp4'
 

@@ -6,9 +6,9 @@ External systems, APIs, and third-party surfaces used by **portal-2026**.
 
 | Endpoint | Implementation | Consumer |
 |----------|----------------|----------|
-| `GET /api/portfolio` | `server/api/portfolio.get.ts` | Pinia store `usePortfolioStore` via `$fetch` in `app/stores/portfolio.ts` |
+| `GET /api/portfolio` | `server/api/portfolio.get.ts` → `qryPortfolioPayload` | Pinia store `usePortfolioStore` via `$fetch` in `app/stores/portfolio.ts` |
 
-The handler returns a **static JSON object** inlined in the file (not a database). Shape matches `app/types/portfolio.ts` (`PortfolioData`).
+The handler delegates to **`qryPortfolioPayload`** in `server/application/dashboard/portfolio/queries.ts` (static JSON, no database). Shape matches `app/types/portfolio.ts` (`PortfolioData`).
 
 ## CDN & hosted media
 
@@ -35,4 +35,4 @@ Defined in `landing.contact.socials` and portfolio payload (`linkedin`, `instagr
 
 ## Secrets & env
 
-- No `.env` usage observed in mapped app/server files. **Do not** commit API keys into `server/api/portfolio.get.ts` or docs if moving to dynamic backends.
+- No `.env` usage observed in mapped app/server files. **Do not** commit API keys into `server/application/dashboard/portfolio/queries.ts` or docs if moving to dynamic backends.

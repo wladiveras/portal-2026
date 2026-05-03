@@ -1,4 +1,3 @@
-import { computed } from 'vue'
 import type { Utm } from '~/utils/utm'
 import { EMPTY_UTM } from '~/utils/utm'
 
@@ -41,6 +40,8 @@ export interface TrackLeadInput {
   source: string
   displayName?: string | null
   contactValue?: string | null
+  /** Associate lead with a dashboard project (e.g. public project landing). */
+  projectId?: string | null
   utm?: Utm
 }
 
@@ -87,6 +88,7 @@ export function useTracker() {
           source: input.source,
           displayName: input.displayName ?? null,
           contactValue: input.contactValue ?? null,
+          projectId: input.projectId ?? null,
           utm: input.utm ?? EMPTY_UTM
         },
         retry: 0

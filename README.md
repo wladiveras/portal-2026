@@ -1,75 +1,36 @@
-# Nuxt Minimal Starter
+# Portal 2026 — Nuxt 4
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Landing premium + **dashboard administrativa** (leads, projetos agile, acessos) com Supabase, RBAC e arquitetura **DDD + Nuxt Layers**.
 
-## Setup
+## Docs do projeto (SSOT)
 
-Make sure to install dependencies:
+| Documento | Conteúdo |
+| --------- | -------- |
+| [`.planning/codebase/CONVENTIONS.md`](.planning/codebase/CONVENTIONS.md) | Estilo, camadas, Nuxt auto-imports |
+| [`.planning/codebase/TESTING.md`](.planning/codebase/TESTING.md) | Vitest, Playwright, CI, UAT humano |
+| [`.planning/codebase/DDD-LAYERS-BLUEPRINT.md`](.planning/codebase/DDD-LAYERS-BLUEPRINT.md) | Bounded contexts e auditoria DDD |
+| [`.planning/codebase/INFRA-STANDARD.md`](.planning/codebase/INFRA-STANDARD.md) | Drizzle vs Supabase por contexto |
+| [`.planning/codebase/AI-AND-SKILLS.md`](.planning/codebase/AI-AND-SKILLS.md) | Cursor, skills GSD, frontend |
+| [`.planning/STATE.md`](.planning/STATE.md) | Estado do roadmap / milestones |
+| [`docs/copy-sources.md`](docs/copy-sources.md) | Onde editar copy (landing vs portfolio API) |
+| [`vault-portal-2026/`](vault-portal-2026) | **Vault Obsidian** (MOC: `Portal 2026 (MOC).md`) — cérebro navegável; regra `.cursor/rules/obsidian-brain.mdc` |
+
+## Regras Cursor
+
+- `.cursor/rules/dashboard.mdc` — dashboard, server, Supabase, layers  
+- `.cursor/rules/ai-skills.mdc` — GSD, skills, precedência sobre skills genéricas  
+
+## Scripts
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
+npm run dev          # http://localhost:3000
+npm run typecheck
+npm run test
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+npm run test:e2e     # Playwright (após build/dev conforme config)
 ```
 
-Locally preview production build:
+## Nuxt
 
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Documentação base: [Nuxt 4](https://nuxt.com/docs/getting-started/introduction).

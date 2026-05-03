@@ -1,21 +1,6 @@
 ---
-description: Convencoes para codigo da admin dashboard (/dashboard/**)
-globs:
-  - app/pages/dashboard/**
-  - app/layouts/dashboard.vue
-  - app/components/dashboard/**
-  - app/composables/useRole.ts
-  - app/composables/useLiveClock.ts
-  - app/composables/useTracker.ts
-  - app/composables/useSectionInView.ts
-  - app/composables/useLeadsQuery.ts
-  - server/api/dashboard/**
-  - server/api/track/**
-  - server/utils/**
-  - supabase/migrations/**
-alwaysApply: false
+alwaysApply: true
 ---
-
 # Dashboard rules — Portal 2026
 
 ## Auto-import e aliases (regra dura)
@@ -70,7 +55,35 @@ Nuxt 4 auto-importa por convencao. Nao usar `import` manual quando o auto-import
 - Paginas em `app/pages/dashboard/**` declaram `definePageMeta({ layout: 'dashboard' })` + `middleware: ['role']` + `role: 'admin' | UserRole[]`.
 - Auth global em `app/middleware/auth.global.ts` so intercepta `/dashboard/**`.
 - Authorization em `useRole().can(action)` e `isAdmin/isEditor`.
+- **Middlewares usam `useRole().ensureProfile()`** (nao `load(true)` direto) para sobreviver ao race do session restore no primeiro login pos-OTP. Se `profile` nao chega apos timeout, redirecionar para `/confirm` ou `/login` -- **nunca 403 por race**.
+- `/confirm` aguarda `ensureProfile()` antes de `navigateTo`, e respeita `?redirect=`.
+- Pagina de erro global e `app/error.vue` com identidade da dashboard (glass + serif).
 - Tipos em `app/types/auth.ts` e `app/types/database.types.ts` (regen via Supabase MCP).
+
+### DDD + Layers (AI-first)
+- **Server DDD por contexto**: `server/domain/dashboard/{projects,sprints,tasks}.service.ts`.
+- Nao usar bridge `server/utils/dashboardProjectsService.ts` (removida). Comandos da app-layer (`server/application/**`) chamam ports/repositorios.
+- Handlers `server/api/dashboard/**` devem ser finos: parse/guard/chamada de **application commands** (`server/application/**`), sem acoplamento direto a dominio/repositorio.
+- **Nuxt Layers**: preparar em `layers/1-base` (fundacoes) e `layers/2-dashboard` (dominio dashboard) com migracao incremental; nao mover tudo de uma vez.
+- Regra de precedencia de Layers:
+  1. `app/**` (override final sobre todos os layers),
+  2. ordem em `extends` no `nuxt.config` — entradas **mais à direita** prevalecem entre layers (ex.: `./layers/2-dashboard` sobrepõe `./layers/1-base`),
+  3. config/projeto base.
+
+### Contratos obrigatorios por camada
+- `server/domain/**`: invariantes, regras de negocio, sem dependencia de HTTP/Nitro.
+- `server/application/**`: orchestracao de use-cases, authz/audit cross-cutting, sem UI concerns.
+- `server/infrastructure/**`: adapters Supabase/Drizzle/repositories, sem regra de negocio de dominio.
+- `server/api/**`: somente adaptacao HTTP (params/body/status), sem regra rica.
+- `layers/2-dashboard/**` e `app/pages/dashboard/**`: composicao e apresentacao; persistencia apenas via store/API.
+
+### Regras de migração do refactor geral
+- Migrar por bounded context (access, leads, projects, tracking, portfolio), nunca por "tipo de arquivo" global.
+- Toda etapa deve manter bridge de compatibilidade (facades/re-exports) ate concluir migracao do contexto.
+- Nao aceitar PR de refactor sem:
+  - update em `.planning/codebase/DDD-LAYERS-BLUEPRINT.md`,
+  - update em `.planning/STATE.md`,
+  - teste cobrindo o boundary alterado.
 
 ## Regra de ouro -- service role
 - `NUXT_SUPABASE_SECRET_KEY` (legacy `SUPABASE_SERVICE_KEY`) so existe no server.
@@ -78,11 +91,32 @@ Nuxt 4 auto-importa por convencao. Nao usar `import` manual quando o auto-import
 - Clients usam anon key + dependem de RLS.
 - Endpoints admin usam `requireAdmin(event)` no inicio para devolver 401/403 antes da logica.
 
+## Rate-limit de email (Supabase)
+- SMTP default do Supabase libera ~3-4 magic links/hora por projeto -- testes repetidos disparam `email rate limit exceeded`.
+- Em dev, preferir login por **email + senha** (configurar `encrypted_password` via MCP com `crypt(..., gen_salt('bf'))` para usuarios de teste).
+- Em producao, configurar SMTP proprio (Resend/SES/Mailtrap) em Supabase Dashboard -> Auth -> SMTP.
+- **Nunca commitar senhas de dev em codigo versionado** -- apenas em `.planning/STATE.md` (local, git-ignored quando aplicavel).
+
 ## Supabase / RLS
 - Migrations numeradas (`0001_auth.sql`, `0002_tracking.sql`, ...).
 - Sempre `ENABLE ROW LEVEL SECURITY` + policies explicitas por role.
 - Verifica policies para `{admin, editor, viewer}` antes de expor endpoint.
-- `is_editor_or_admin()` e `can_access_project(uuid)` ja existem como helpers; reusa.
+- Helpers ja existentes (reusa!): `public.is_admin()`, `public.is_editor_or_admin()`, `public.can_access_project(uuid)`. Todos `SECURITY DEFINER` com `search_path = public`.
+- **Nunca** escrever `exists (select 1 from public.profiles where role = 'admin')` diretamente em policies -- dispara recursao RLS (erro 500 "infinite recursion detected in policy for relation 'profiles'"). Usa `public.is_admin()`.
+- Toda nova policy que precise distinguir role **chama a helper apropriada**, nao faz subquery inline em `profiles`.
+
+### Supabase + Drizzle (hibrido)
+- Estrategia oficial atual: `Drizzle -> fallback Supabase service-role` nos services de dashboard.
+- Se `DATABASE_URL` nao existe, o fluxo deve funcionar integralmente por Supabase.
+- Auditoria de mutacoes criticas sempre via `public.log_audit()` (`server/utils/audit.ts`).
+- Nenhum write sensivel direto no cliente; cliente conversa apenas com Nitro.
+
+### Optimistic load/update (Pinia)
+- Estados de dashboard devem privilegiar UX responsiva com:
+  - update otimista local,
+  - rollback em erro,
+  - reconciliacao por refetch seletivo.
+- Se a mutacao falhar, restaurar snapshot local antes de propagar erro.
 
 ## Layout
 - Grid principal `grid-cols-12 gap-4`. Mobile stack.
@@ -103,9 +137,18 @@ Nuxt 4 auto-importa por convencao. Nao usar `import` manual quando o auto-import
 ## Checklist antes de commitar
 - [ ] `npm run typecheck` verde (nuxt typecheck local, sem npx).
 - [ ] `npm run test` verde.
+- [ ] Alterações em copy/média/landing relevantes: considerar **Human UAT (TEST-06)** em `.planning/codebase/TESTING.md`.
 - [ ] Sem `import` redundante (vue, componentes locais, server utils).
 - [ ] Sem path com `..` -- so aliases `~/` ou `~~/`.
 - [ ] Sem hex inline ou cor fora dos tokens.
 - [ ] Sem service key no bundle cliente.
 - [ ] RLS testada para os tres roles.
 - [ ] `.planning/STATE.md` atualizado se fechaste fase.
+
+## Checklist arquitetural de PR (obrigatorio)
+- [ ] `server/api/**` continua fino (parse/guard/dispatch), sem regra rica.
+- [ ] `server/application/**` orquestra use-cases; sem detalhes de driver/persistencia.
+- [ ] `server/domain/**` preserva invariantes; sem dependência HTTP/Nitro.
+- [ ] `server/infrastructure/**` contem adapters/repositories; sem regra de negocio.
+- [ ] Mudancas de boundary atualizam `.planning/codebase/CONVENTIONS.md` e `.planning/codebase/TESTING.md`.
+- [ ] PR com refactor DDD inclui testes do boundary alterado (contract/unit/e2e conforme escopo).

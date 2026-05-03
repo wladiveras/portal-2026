@@ -2,6 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  extends: ['./layers/1-base', './layers/2-dashboard'],
   modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss', '@nuxtjs/supabase'],
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
@@ -13,7 +14,8 @@ export default defineNuxtConfig({
     supabaseServiceKey:
       process.env.SUPABASE_SERVICE_KEY ??
       process.env.NUXT_SUPABASE_SECRET_KEY ??
-      ''
+      '',
+    databaseUrl: process.env.DATABASE_URL ?? process.env.NUXT_DATABASE_URL ?? ''
   },
   supabase: {
     redirectOptions: {

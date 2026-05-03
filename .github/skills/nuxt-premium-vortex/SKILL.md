@@ -3,6 +3,8 @@ name: nuxt-premium-vortex
 description: Implementation guardrails for the light premium Nuxt portfolio with vortex scroll-video hero.
 ---
 
+> **Portal 2026:** este repo tem **dark mode na dashboard**, tokens HSL em `app/assets/css/main.css`, e identidade em `.cursor/rules/dashboard.mdc`. Onde o skill abaixo fixar tema claro só na landing, validar contra o código actual; o skill é referência de estrutura (hero vídeo, GSAP), não SSOT de tema global.
+
 # Nuxt Premium Vortex Skill
 
 ## Mandatory Stack

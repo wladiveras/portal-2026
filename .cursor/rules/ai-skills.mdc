@@ -1,0 +1,34 @@
+---
+alwaysApply: true
+---
+# IA, GSD e skills — Portal 2026
+
+## Precedência
+
+1. **`.cursor/rules/dashboard.mdc`** (código, DDD, Supabase, layers) — prevalece sobre skills genéricas.
+2. **`.cursor/rules/obsidian-brain.mdc`** — vault `vault-portal-2026/` como cérebro navegável; actualizar notas quando mudar SSOT arquitectural documentado.
+3. **`.planning/codebase/CONVENTIONS.md`**, **INFRA-STANDARD.md**, **TESTING.md**, **DDD-LAYERS-BLUEPRINT.md**.
+
+## GSD (planeamento / fases)
+
+- Artefactos: `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/phases/**`.
+- Skills GSD: instalação global do operador (ex. `~/.claude/skills/gsd-*/SKILL.md`); seguir o fluxo do skill ao planear ou executar fases.
+- Ao concluir fase: actualizar **STATE** + **TESTING** (se suites novas) + docs de boundary em **CONVENTIONS** / **MIGRATION-CHECKLIST** quando aplicável.
+
+## Skills no repo
+
+- **`.planning/codebase/AI-AND-SKILLS.md`** — guia longo: Cursor, GSD, frontend, conflitos com skills.
+- **`.github/skills/nuxt-premium-vortex/`** — landing/hero; **validar** tokens e dark mode reais do repo (podem divergir do skill legado).
+- Skills em `.claude/skills/` / `.agents/skills/` — não entram no bundle Nuxt; usar como referência (Supabase, UI).
+
+## Frontend / UI externo
+
+- Ao usar skills “premium UI” ou redesign: respeitar tokens (`main.css` / Tailwind), auto-imports Nuxt, e componentes em **layers** conforme **dashboard.mdc**.
+
+## Copy / marketing
+
+- SSOT de texto: **`docs/copy-sources.md`** (landing vs `qryPortfolioPayload`).
+
+## Infra opcional
+
+- Paridade Drizzle extra para leads/access: política em **`.planning/codebase/INFRA-STANDARD.md`** — não é obrigatória até haver schema Drizzle completo.

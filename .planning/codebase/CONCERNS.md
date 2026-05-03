@@ -4,8 +4,8 @@ Risks, debt, and fragile areas for **portal-2026** (subjective; verify before pr
 
 ## Data & CMS
 
-- **`/api/portfolio` is a static blob** in `server/api/portfolio.get.ts`. Updating portfolio content requires code edits and redeploy; no CMS, DB, or env-driven config.
-- **Duplication risk** between marketing tone in `landing.ts` and long-form `about` / narratives in the API response — editorial drift over time.
+- **`/api/portfolio` is a static blob** built by `qryPortfolioPayload` (`server/application/dashboard/portfolio/queries.ts`). Updating portfolio content requires code edits and redeploy; no CMS, DB, or env-driven config.
+- **Duplication risk** between marketing tone in `landing.ts` and long-form `about` / narratives in the API response — editorial drift over time. **Mitigação documentada:** [`docs/copy-sources.md`](../docs/copy-sources.md).
 
 ## Media & assets
 
@@ -29,7 +29,7 @@ Risks, debt, and fragile areas for **portal-2026** (subjective; verify before pr
 
 ## Operational
 
-- **No automated tests** (see `TESTING.md`) — regressions caught only manually.
+- **Automated suite exists** (`npm run test`, `npm run test:e2e`, CI em `.github/workflows/ci.yml`); ver `.planning/codebase/TESTING.md`. Regressões visuais/vídeo ainda dependem de **Human UAT (TEST-06)**.
 - **No pinned deployment manifest** in repo — reproduce prod behavior depends on host defaults.
 
 ## Dependency drift

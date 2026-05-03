@@ -23,6 +23,7 @@
   --text: 210 20% 96%;
   --muted: 215 14% 65%;
   --stroke: 222 18% 18%;
+  color-scheme: dark;
 }
 
 * {
@@ -46,6 +47,24 @@ body {
 .accent-gradient {
   background: linear-gradient(90deg, #89aacc 0%, #4e85bf 100%);
   background-size: 200% 200%;
+}
+
+.accent-text {
+  display: inline-block;
+  background: linear-gradient(90deg, #89aacc 0%, #4e85bf 100%);
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .accent-text {
+    background: none;
+    color: #4e85bf;
+    -webkit-text-fill-color: initial;
+  }
 }
 
 .gradient-border {

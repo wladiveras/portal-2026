@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+---
+# Obsidian — cérebro do projecto (portal-2026)
+
+## Onde está o vault
+
+- Pasta: **`vault-portal-2026/`** na raiz do repositório (abrir como vault no Obsidian: pasta `vault-portal-2026`).
+- **MOC (entrada):** `vault-portal-2026/Portal 2026 (MOC).md` — mapa, wikilinks, grafo.
+- **Hub planning:** `vault-portal-2026/Planeamento repo — espelho SSOT.md` — tabela de links para `.planning/codebase/*` e `docs/`.
+
+## Papel do vault vs repo
+
+| Fonte | Função |
+|-------|--------|
+| **`.planning/**`, `docs/`, código** | SSOT para CI, implementação, PRs (verdade de merge) |
+| **Vault Obsidian** | Cérebro **navegável** — resumos, diagramas, wikilinks, descoberta; deve **espelhar** decisões do repo |
+
+Se divergirem, prevalece **repo + git**. Actualiza o vault quando mudares contratos de API, camadas DDD, ou mapas copy.
+
+## Regras para o agente
+
+1. **Antes** de decisões amplas de arquitectura, copy SSOT, ou dashboard: ler **MOC** e notas linkadas relevantes (ex. [[API portfolio (Nitro)]] no vault = ficheiro `API portfolio (Nitro).md`).
+2. **Depois** de alterar `server/application/**`, contrato portfolio, ou `.planning/codebase/*`: **actualizar** a nota do vault correspondente e o [[Planeamento repo — espelho SSOT]] se mudarem entradas da tabela.
+3. Usar **Obsidian Flavored Markdown** nas notas: frontmatter YAML, `[[wikilinks]]`, callouts quando útil (skill: obsidian-markdown no ambiente Claude).
+
+## Skills úteis
+
+- Edição de notas: fluxo da skill **obsidian-markdown** (wikilinks, propriedades).
+- Operações CLI no vault (opcional): **obsidian-cli** se instalado — não obrigatório para este fluxo.

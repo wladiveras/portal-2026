@@ -9,6 +9,7 @@ process.env.NUXT_PUBLIC_SUPABASE_KEY = process.env.SUPABASE_KEY
 export default defineVitestConfig({
   test: {
     environment: 'nuxt',
+    setupFiles: ['tests/setup.ts'],
     environmentOptions: {
       nuxt: {
         domEnvironment: 'happy-dom'
